@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Pacifico&display=swap" rel="stylesheet">
+<title>Appetite</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FF5A1F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23FF5A1F'/%3E%3Crect x='22' y='62' width='56' height='6' rx='3' fill='%23fff'/%3E%3Cpath d='M30 62a20 20 0 0 1 40 0z' fill='%23fff'/%3E%3Ccircle cx='50' cy='38' r='4' fill='%23fff'/%3E%3Cpath d='M36 52a14 14 0 0 1 6-10' stroke='%23FFC93C' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{--r:14px;--bg:#fff;--c:#f4f4f4;--t:#111;--m:#666;--l:#e3e3e3;--o:#FF5A1F}
+[data-theme=dark]{--bg:#0f0f0f;--c:#1c1c1c;--t:#f2f2f2;--m:#9a9a9a;--l:#2c2c2c}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--fb,system-ui,sans-serif);background:var(--bg);color:var(--t);font-size:15px;padding-top:env(safe-area-inset-top,0px)}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--l);position:sticky;top:0;background:var(--bg);z-index:5}
+header b{color:var(--o);font-size:18px;flex:1}
+main{max-width:640px;margin:auto;padding:14px 14px 96px}
+nav{position:fixed;bottom:0;left:0;right:0;max-width:640px;margin:auto;display:flex;background:var(--bg);border-top:1px solid var(--l);padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 12px;background:var(--o);color:#fff}
+button.g{background:var(--c);color:var(--t);border:1px solid var(--l)}
+button.s{padding:6px 10px;font-size:13px}
+nav button{flex:1;background:none;color:var(--m);border-radius:0;padding:12px 2px;font-size:12px}
+nav button.on{color:var(--o);font-weight:600}
+input,select{font:inherit;width:100%;padding:10px;border-radius:10px;border:1px solid var(--l);background:var(--c);color:var(--t);margin:4px 0}
+.card{background:var(--c);border:1px solid var(--l);border-radius:var(--r);padding:12px;margin:10px 0}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chip{display:inline-block;padding:6px 12px;border-radius:99px;border:1px solid var(--l);margin:2px;background:var(--c);color:var(--t);font-size:13px;cursor:pointer}
+.chip.on{background:var(--o);color:#fff;border-color:var(--o)}
+.m{color:var(--m);font-size:13px}
+h2{margin:8px 0 4px;font-size:18px;font-family:var(--ft,Georgia,serif)}
+header b{font-family:var(--ft,Georgia,serif)}
+.tag{font-size:12px;padding:3px 8px;border-radius:8px;background:var(--l)}
+.ok{color:#1a9d4a}.warn{color:var(--o)}
+.center{text-align:center}
+.bar{background:var(--l);border-radius:99px;height:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--o)}
+svg.map{width:100%;height:auto;border-radius:14px;border:1px solid var(--l);display:block}
+.ic{display:inline-block}
+.reels{display:flex;gap:10px;justify-content:center;background:#1a1a1a;padding:14px;border-radius:18px;box-shadow:inset 0 4px 16px #000a}
+.reel{width:96px;height:96px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.reel-s{width:72px;height:72px}
+.reel-s svg{width:100%;height:100%}
+.ic svg{width:100%;height:100%;display:block}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const K='appetite_app_v3';
+const LOGO='<svg viewBox="0 0 100 100" width="36" height="36"><rect width="100" height="100" rx="24" fill="#FF5A1F"/><rect x="22" y="62" width="56" height="6" rx="3" fill="#fff"/><path d="M30 62a20 20 0 0 1 40 0z" fill="#fff"/><circle cx="50" cy="38" r="4" fill="#fff"/><path d="M36 52a14 14 0 0 1 6-10" stroke="#FFC93C" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';
+const LN={fr:'Français',ar:'العربية',en:'English',es:'Español'};
+const IMG={
+all:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#FF5A1F" stroke-width="6"/><path d="M30 60h40M34 50h32" stroke="#FF5A1F" stroke-width="6" stroke-linecap="round"/></svg>`,
+pizza:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#E9A23B"/><circle cx="50" cy="50" r="39" fill="#F7D27A"/><circle cx="50" cy="50" r="34" fill="#D9372B"/><circle cx="50" cy="50" r="31" fill="#FFE08A" opacity=".85"/><g fill="#C8202A"><circle cx="38" cy="42" r="6"/><circle cx="62" cy="40" r="6"/><circle cx="52" cy="60" r="6"/><circle cx="40" cy="64" r="5"/><circle cx="66" cy="62" r="5"/></g><g fill="#2E8B3E"><circle cx="50" cy="50" r="2.5"/><circle cx="60" cy="52" r="2"/><circle cx="44" cy="54" r="2"/></g></svg>`,
+sandwich:`<svg viewBox="0 0 100 100"><rect x="12" y="74" width="76" height="12" rx="5" fill="#D9A05B"/><path d="M14 64 H86 V74 H14Z" fill="#F2C94C"/><rect x="14" y="56" width="72" height="8" rx="4" fill="#E53E2E"/><path d="M12 58 Q20 48 28 58 T44 58 T60 58 T76 58 T88 58 V52 H12Z" fill="#5BB84A"/><path d="M12 50 Q50 14 88 50 Z" fill="#E8B56B"/></svg>`,
+tacos:`<svg viewBox="0 0 100 100"><path d="M10 46 Q50 100 90 46 Z" fill="#F0B43A"/><path d="M10 46 Q50 90 90 46" stroke="#D89A22" stroke-width="4" fill="none"/><path d="M18 46 Q30 22 48 30 Q60 18 80 46 Z" fill="#6BBE4B"/><circle cx="36" cy="40" r="7" fill="#8B4A2B"/><circle cx="58" cy="38" r="7" fill="#8B4A2B"/><circle cx="50" cy="30" r="5" fill="#E53E2E"/><circle cx="72" cy="42" r="4" fill="#F2C94C"/></svg>`,
+bocadillo:`<svg viewBox="0 0 100 100"><rect x="6" y="38" width="88" height="28" rx="14" fill="#D9A05B"/><path d="M14 48 Q50 40 86 48" stroke="#B57A3A" stroke-width="2" fill="none"/><path d="M12 56 Q50 50 88 56 L88 60 Q50 54 12 60Z" fill="#F08080"/><path d="M14 58 Q30 52 46 58 T78 58" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/><rect x="18" y="62" width="64" height="6" rx="3" fill="#E8D9A0"/></svg>`,
+plat:`<svg viewBox="0 0 100 100"><path d="M14 46 H86 Q84 80 50 82 Q16 80 14 46Z" fill="#FF5A1F"/><ellipse cx="50" cy="46" rx="36" ry="7" fill="#FFB38A"/><path d="M36 34 q4-8 0-14M50 34 q4-8 0-14M64 34 q4-8 0-14" stroke="#999" stroke-width="3" fill="none"/></svg>`,
+snack:`<svg viewBox="0 0 100 100"><path d="M26 44 L74 44 L62 90 L38 90Z" fill="#E53E2E"/><g fill="#F2C94C"><rect x="32" y="16" width="8" height="34" rx="3"/><rect x="44" y="10" width="8" height="40" rx="3"/><rect x="56" y="18" width="8" height="30" rx="3"/></g></svg>`,
+boisson:`<svg viewBox="0 0 100 100"><path d="M26 30 H74 L66 90 H34Z" fill="#FF5A1F"/><path d="M26 30 H74" stroke="#fff" stroke-width="6"/><path d="M60 30 L70 12" stroke="#2E8B3E" stroke-width="4"/><circle cx="70" cy="12" r="5" fill="#2E8B3E"/></svg>`
+};
+Object.assign(IMG,{
+pizza:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#D89232"/><circle cx="50" cy="50" r="41" fill="#F3C677"/><circle cx="50" cy="50" r="36" fill="#E0412B"/><path d="M50 50L50 14M50 50L86 50M50 50L50 86M50 50L14 50M50 50L78 22M50 50L78 78M50 50L22 78M50 50L22 22" stroke="#F7E7B0" stroke-width="2.5"/><g fill="#FFF3C4"><circle cx="40" cy="38" r="5"/><circle cx="62" cy="40" r="5"/><circle cx="56" cy="62" r="5"/><circle cx="36" cy="62" r="5"/></g><g fill="#B3261E"><circle cx="40" cy="38" r="2"/><circle cx="62" cy="40" r="2"/><circle cx="56" cy="62" r="2"/><circle cx="36" cy="62" r="2"/></g><path d="M48 46q4-4 8 0q-4 4-8 0z" fill="#2E8B3E"/><path d="M66 58q4-3 7 1q-4 3-7-1z" fill="#2E8B3E"/></svg>`,
+tacos:`<svg viewBox="0 0 100 100"><path d="M8 52Q50 98 92 52Q50 74 8 52Z" fill="#E8A62A"/><path d="M14 52Q50 22 86 52Q50 40 14 52Z" fill="#F7D36B"/><path d="M14 50Q24 34 38 42Q48 26 62 38Q74 30 86 50Q50 44 14 50Z" fill="#5BB84A"/><circle cx="34" cy="48" r="6" fill="#7A3E22"/><circle cx="54" cy="44" r="6" fill="#7A3E22"/><circle cx="70" cy="50" r="4" fill="#E53E2E"/><circle cx="46" cy="56" r="3" fill="#F2C94C"/></svg>`,
+bocadillo:`<svg viewBox="0 0 100 100"><g transform="rotate(-18 50 50)"><rect x="4" y="36" width="92" height="28" rx="14" fill="#D9A05B"/><path d="M12 46Q50 38 88 46" stroke="#A8702F" stroke-width="2" fill="none"/><path d="M10 56Q50 50 90 56L90 62Q50 56 10 62Z" fill="#F08080"/><rect x="16" y="62" width="68" height="5" rx="2.5" fill="#F2C94C"/></g></svg>`
+});
+Object.assign(IMG,{
+pizza:`<img src="photos/pizza_vegetarienne.jpg" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`,
+burger:`<img src="photos/burger_cheese.jpg" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`,
+tacos:`<img src="photos/tacos.jpg" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`,
+sandwich:`<img src="photos/sandwich_vegetarien.jpg" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`,
+bocadillo:`<img src="photos/sandwich_jambon.jpg" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`,
+cafe:`<img src="photos/cafe_noir.jpg" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`
+});
+function BANNER(){return `<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#FF5A1F,#FF8A4C);color:#fff;border-radius:var(--r);padding:14px;margin-bottom:10px"><div style="width:64px;height:64px;flex:none"><svg viewBox="0 0 100 100"><path d="M18 62h64v8H18z" fill="#fff"/><path d="M28 62a22 22 0 0 1 44 0z" fill="#fff"/><circle cx="50" cy="36" r="4" fill="#fff"/><path d="M36 54a14 14 0 0 1 6-10" stroke="#FFD166" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><div><div style="font-weight:700;font-size:17px">Appetite</div><div style="font-size:13px;opacity:.92">${t('tag')}</div></div></div>`;}
+function dishImg(d,r){return `<div class="ic" style="width:56px;height:56px;flex:none;border-radius:12px;overflow:hidden">${d.img?`<img src="${d.img}" alt="" style="width:100%;height:100%;object-fit:cover">`:(IMG[r.c]||'')}</div>`;}
+function ADDDISH(n,p){
+ const r=myRest();const inp=document.getElementById('dimg');const f=inp&&inp.files&&inp.files[0];
+ const add=img=>{r.d.push({id:++D.seq,n,p,img:img||''});sv();S.msg=t('dishOk');R();};
+ if(!f)return add('');
+ const fr=new FileReader();
+ fr.onload=()=>{const im=new Image();im.onload=()=>{const sc=320/Math.max(im.width,im.height);const c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext('2d').drawImage(im,0,0,c.width,c.height);add(c.toDataURL('image/jpeg',.82));};im.src=fr.result;};
+ fr.readAsDataURL(f);
+}
+function track(st){const k=['nw','pr','rc','lv'],i=k.indexOf(st);return `<div class="bar" style="margin-top:10px"><i style="width:${(i+1)*25}%"></i></div><div class="row m" style="font-size:11px">${k.map((s,j)=>`<span style="color:${j<=i?'var(--o)':'inherit'}">${t('s_'+s)}</span>`).join('')}</div>`}
+const NAV={cust:[['home','home'],['game','game'],['orders','orders'],['loyal','loyal'],['profile','profile']],sell:[['orders','orders'],['menu','menu'],['map','map'],['status','status'],['profile','profile']],driv:[['missions','missions'],['active','active'],['map','map'],['earn','earn'],['profile','profile']]};
+const DEF={cust:'home',sell:'orders',driv:'missions'};
+
+const L={
+fr:{tag:"Mangez bien, au bon prix, sans perdre votre pause.",login:"Connexion",signup:"Inscription",forgot:"Mot de passe oublié ?",reset:"Envoyer le lien de réinitialisation",resetSent:"Lien de réinitialisation envoyé à votre e-mail.",noAcc:"Aucun compte avec cet e-mail.",bad:"E-mail ou mot de passe incorrect.",exists:"Cet e-mail existe déjà.",err:"Remplissez tous les champs.",email:"E-mail",pass:"Mot de passe",name:"Nom",phone:"Téléphone",rc:"Stagiaire (je commande)",rs:"Vendeur (je vends)",rd:"Livreur (je livre)",google:"Continuer avec Gmail",apple:"Continuer avec Apple",logout:"Déconnexion",theme:"Thème",home:"Accueil",game:"Jeu",orders:"Commandes",loyal:"Fidélité",profile:"Profil",missions:"Missions",active:"En cours",earn:"Gains",menu:"Menu",status:"Statut",all:"Tous",maxp:"Prix max (MAD)",list:"Liste",map:"Carte",reco:"Recommandé",near:"Près de la CMC",add:"Ajouter",cart:"Panier",cartEmpty:"Votre panier est vide.",total:"Total",order:"Commander",empty:"Rien pour le moment.",open:"Ouvert",closed:"Fermé",wait:"Attente (min)",min:"min",gain:"Gain",eta:"Temps estimé",accept:"Accepter",refuse:"Refuser",pickup:"Confirmer la récupération",deliver:"Confirmer la livraison",waitPrep:"Commande pas prête : attendre",noMission:"Aucune mission pour le moment.",rate:"Évaluation",pts:"points",reward:"Produit à prix de faveur (-50%)",ptsRule:"1 point par commande livrée et par sandwich composé.",ptsDone:"Récompense activée sur votre prochaine commande.",bread:"Pain",fill:"Garniture",sauce:"Sauce",build:"Ajouter mon sandwich",gameDesc:"Ajoutez des ingrédients à n'importe quel plat et grimpez au classement.",score:"Score",best:"Record",claim:"Réclamer 0.1 point de fidélité",extras:"Ingrédients supplémentaires",play:"Valider ma création",addCart:"Ajouter au panier",claimed:"Vous avez gagné 0.1 point de fidélité !",toClaim:"Atteignez 1000 points pour réclamer 0.1 point de fidélité.",bonus:"Bonus combo",base:"Base",pick:"Choisissez un plat de base",gained:"points",pend:"Profil en attente de validation par l'administration.",validate:"Valider (démo admin)",markReady:"Marquer prête",waitDriver:"En attente de livreur",toggleOpen:"Ouvrir / Fermer",dish:"Plat",priceU:"Prix (MAD)",saveBtn:"Enregistrer",saved:"Enregistré.",c_pizza:"Pizzas",c_tacos:"Tacos",c_bocadillo:"Bocadillos",c_sandwich:"Sandwichs",c_plat:"Plats",c_snack:"Snacks",c_boisson:"Boissons",s_nw:"Nouvelle",s_pr:"Prête",s_rc:"Récupérée",s_lv:"Livrée",added:"Ajouté au panier.",ordered:"Commande envoyée !",built:"Sandwich ajouté au panier (+1 point)."},
+ar:{tag:"كُل جيداً، بسعر مناسب، دون أن تفوّت استراحتك.",login:"تسجيل الدخول",signup:"إنشاء حساب",forgot:"نسيت كلمة المرور؟",reset:"إرسال رابط إعادة التعيين",resetSent:"تم إرسال رابط إعادة التعيين إلى بريدك.",noAcc:"لا يوجد حساب بهذا البريد.",bad:"البريد أو كلمة المرور غير صحيحة.",exists:"هذا البريد مسجل بالفعل.",err:"املأ جميع الحقول.",email:"البريد الإلكتروني",pass:"كلمة المرور",name:"الاسم",phone:"الهاتف",rc:"متدرب (أطلب)",rs:"بائع (أبيع)",rd:"موصّل (أوصل)",google:"المتابعة عبر Gmail",apple:"المتابعة عبر Apple",logout:"تسجيل الخروج",theme:"المظهر",home:"الرئيسية",game:"اللعبة",orders:"الطلبات",loyal:"الولاء",profile:"الملف",missions:"المهام",active:"الجارية",earn:"الأرباح",menu:"القائمة",status:"الحالة",all:"الكل",maxp:"أقصى سعر (MAD)",list:"قائمة",map:"خريطة",reco:"مقترح لك",near:"قرب CMC",add:"أضف",cart:"السلة",cartEmpty:"السلة فارغة.",total:"المجموع",order:"اطلب",empty:"لا شيء بعد.",open:"مفتوح",closed:"مغلق",wait:"وقت الانتظار (دقيقة)",min:"د",gain:"الربح",eta:"الوقت المقدّر",accept:"قبول",refuse:"رفض",pickup:"تأكيد الاستلام",deliver:"تأكيد التسليم",waitPrep:"الطلب غير جاهز: انتظر",noMission:"لا توجد مهام حالياً.",rate:"التقييم",pts:"نقطة",reward:"منتج بسعر تفضيلي (-50%)",ptsRule:"نقطة لكل طلب مُسلَّم ولكل ساندويتش مُركّب.",ptsDone:"تم تفعيل المكافأة على طلبك القادم.",bread:"الخبز",fill:"الحشوة",sauce:"الصلصة",build:"أضف ساندويتشي",gameDesc:"أضف إضافات إلى أي طبق واصعد في الترتيب.",score:"النقاط",best:"الرقم القياسي",claim:"المطالبة بـ 0.1 نقطة ولاء",extras:"إضافات",play:"تأكيد ابتكاري",addCart:"أضف إلى السلة",claimed:"ربحت 0.1 نقطة ولاء!",toClaim:"حقق 1000 نقطة للمطالبة بـ 0.1 نقطة ولاء.",bonus:"مكافأة التركيبة",base:"الأساس",pick:"اختر طبقاً أساسياً",gained:"نقطة",pend:"الملف بانتظار موافقة الإدارة.",validate:"موافقة (تجربة مدير)",markReady:"جاهز",waitDriver:"بانتظار موصّل",toggleOpen:"فتح / إغلاق",dish:"الطبق",priceU:"السعر (MAD)",saveBtn:"حفظ",saved:"تم الحفظ.",c_pizza:"بيتزا",c_tacos:"تاكوس",c_bocadillo:"بوكاديو",c_sandwich:"ساندويتشات",c_plat:"أطباق",c_snack:"سناك",c_boisson:"مشروبات",s_nw:"جديدة",s_pr:"جاهزة",s_rc:"مستلمة",s_lv:"مُسلَّمة",added:"أُضيف إلى السلة.",ordered:"تم إرسال الطلب!",built:"أُضيف الساندويتش إلى السلة (+1 نقطة)."},
+en:{tag:"Eat well, at a good price, without losing your break.",login:"Log in",signup:"Sign up",forgot:"Forgot password?",reset:"Send reset link",resetSent:"A reset link has been sent to your email.",noAcc:"No account with this email.",bad:"Wrong email or password.",exists:"This email already exists.",err:"Fill in all fields.",email:"Email",pass:"Password",name:"Name",phone:"Phone",rc:"Trainee (I order)",rs:"Seller (I sell)",rd:"Driver (I deliver)",google:"Continue with Gmail",apple:"Continue with Apple",logout:"Log out",theme:"Theme",home:"Home",game:"Game",orders:"Orders",loyal:"Loyalty",profile:"Profile",missions:"Missions",active:"Active",earn:"Earnings",menu:"Menu",status:"Status",all:"All",maxp:"Max price (MAD)",list:"List",map:"Map",reco:"Recommended",near:"Near CMC",add:"Add",cart:"Cart",cartEmpty:"Your cart is empty.",total:"Total",order:"Order",empty:"Nothing yet.",open:"Open",closed:"Closed",wait:"Wait time (min)",min:"min",gain:"Earnings",eta:"Estimated time",accept:"Accept",refuse:"Refuse",pickup:"Confirm pickup",deliver:"Confirm delivery",waitPrep:"Order not ready: wait",noMission:"No missions right now.",rate:"Rating",pts:"points",reward:"Discounted product (-50%)",ptsRule:"1 point per delivered order and per custom sandwich.",ptsDone:"Reward applied to your next order.",bread:"Bread",fill:"Filling",sauce:"Sauce",build:"Add my sandwich",gameDesc:"Add ingredients to any dish and climb the leaderboard.",score:"Score",best:"Best",claim:"Claim 0.1 loyalty points",extras:"Extra ingredients",play:"Submit my creation",addCart:"Add to cart",claimed:"You won 0.1 loyalty points!",toClaim:"Reach 1000 points to claim 0.1 loyalty points.",bonus:"Combo bonus",base:"Base",pick:"Pick a base dish",gained:"points",pend:"Profile awaiting admin approval.",validate:"Approve (admin demo)",markReady:"Mark ready",waitDriver:"Waiting for a driver",toggleOpen:"Open / Close",dish:"Dish",priceU:"Price (MAD)",saveBtn:"Save",saved:"Saved.",c_pizza:"Pizzas",c_tacos:"Tacos",c_bocadillo:"Bocadillos",c_sandwich:"Sandwiches",c_plat:"Meals",c_snack:"Snacks",c_boisson:"Drinks",s_nw:"New",s_pr:"Ready",s_rc:"Picked up",s_lv:"Delivered",added:"Added to cart.",ordered:"Order sent!",built:"Sandwich added to cart (+1 point)."},
+es:{tag:"Come bien, a buen precio, sin perder tu pausa.",login:"Iniciar sesión",signup:"Registrarse",forgot:"¿Olvidaste la contraseña?",reset:"Enviar enlace de restablecimiento",resetSent:"Se ha enviado un enlace a tu correo.",noAcc:"No hay cuenta con este correo.",bad:"Correo o contraseña incorrectos.",exists:"Este correo ya existe.",err:"Rellena todos los campos.",email:"Correo",pass:"Contraseña",name:"Nombre",phone:"Teléfono",rc:"Becario (pido)",rs:"Vendedor (vendo)",rd:"Repartidor (entrego)",google:"Continuar con Gmail",apple:"Continuar con Apple",logout:"Cerrar sesión",theme:"Tema",home:"Inicio",game:"Juego",orders:"Pedidos",loyal:"Fidelidad",profile:"Perfil",missions:"Misiones",active:"En curso",earn:"Ganancias",menu:"Menú",status:"Estado",all:"Todos",maxp:"Precio máx (MAD)",list:"Lista",map:"Mapa",reco:"Recomendado",near:"Cerca de la CMC",add:"Añadir",cart:"Carrito",cartEmpty:"Tu carrito está vacío.",total:"Total",order:"Pedir",empty:"Nada por ahora.",open:"Abierto",closed:"Cerrado",wait:"Tiempo de espera (min)",min:"min",gain:"Ganancia",eta:"Tiempo estimado",accept:"Aceptar",refuse:"Rechazar",pickup:"Confirmar recogida",deliver:"Confirmar entrega",waitPrep:"Pedido no listo: esperar",noMission:"No hay misiones ahora.",rate:"Valoración",pts:"puntos",reward:"Producto a precio especial (-50%)",ptsRule:"1 punto por pedido entregado y por sándwich personalizado.",ptsDone:"Recompensa aplicada a tu próximo pedido.",bread:"Pan",fill:"Relleno",sauce:"Salsa",build:"Añadir mi sándwich",gameDesc:"Añade ingredientes a cualquier plato y sube en el ranking.",score:"Puntuación",best:"Récord",claim:"Reclamar 0.1 puntos de fidelidad",extras:"Ingredientes extra",play:"Enviar mi creación",addCart:"Añadir al carrito",claimed:"¡Has ganado 0.1 puntos de fidelidad!",toClaim:"Llega a 1000 puntos para reclamar 0.1 puntos de fidelidad.",bonus:"Bonus combo",base:"Base",pick:"Elige un plato base",gained:"puntos",pend:"Perfil pendiente de aprobación.",validate:"Aprobar (demo admin)",markReady:"Marcar lista",waitDriver:"Esperando repartidor",toggleOpen:"Abrir / Cerrar",dish:"Plato",priceU:"Precio (MAD)",saveBtn:"Guardar",saved:"Guardado.",c_pizza:"Pizzas",c_tacos:"Tacos",c_bocadillo:"Bocadillos",c_sandwich:"Sándwiches",c_plat:"Platos",c_snack:"Snacks",c_boisson:"Bebidas",s_nw:"Nuevo",s_pr:"Lista",s_rc:"Recogido",s_lv:"Entregado",added:"Añadido al carrito.",ordered:"¡Pedido enviado!",built:"Sándwich añadido al carrito (+1 punto)."}
+};
+
+function seedOld(){return{lang:'fr',theme:'light',u:null,users:[],seq:100,cart:{rid:null,items:{}},os:[],rs:[
+{id:1,n:'Tacos El Ali',c:'tacos',x:30,y:40,open:true,w:10,r:4.5,o:12,st:'ok',owner:null,d:[{id:1,n:'Tacos poulet',p:25},{id:2,n:'Panini',p:20}]},
+{id:2,n:'Le Projet Sara',c:'sandwich',x:62,y:30,open:true,w:15,r:4.7,o:20,st:'ok',owner:null,d:[{id:3,n:'Sandwich thon',p:18},{id:4,n:'Sandwich poulet',p:22}]},
+{id:3,n:'Resto Bab',c:'plat',x:72,y:64,open:true,w:20,r:4.2,o:8,st:'ok',owner:null,d:[{id:5,n:'Tajine',p:35},{id:6,n:'Riz poulet',p:30}]},
+{id:4,n:'Café Atlas',c:'boisson',x:38,y:72,open:false,w:5,r:4,o:5,st:'ok',owner:null,d:[{id:7,n:"Jus d'orange",p:10},{id:8,n:'Café',p:8}]},{id:5,n:'Pizza Roma',c:'pizza',x:56,y:52,open:true,w:18,r:4.6,o:14,st:'ok',owner:null,d:[{id:9,n:'Margherita',p:40},{id:10,n:'4 Fromages',p:55}]},{id:6,n:'Bocadillo Plaza',c:'bocadillo',x:22,y:60,open:true,w:8,r:4.3,o:9,st:'ok',owner:null,d:[{id:11,n:'Jamón',p:28},{id:12,n:'Chorizo',p:25}]}]}}
+
+const PHOTO={tacos:'photos/tacos.jpg',pizzaV:'photos/pizza_vegetarienne.jpg',pizzaH:'photos/pizza_hawaienne.jpg',pizzaR:'photos/pizza_roquette.jpg',burgerC:'photos/burger_classic.jpg',burgerF:'photos/burger_cheese.jpg',cafeE:'photos/cafe_espresso.jpg',cafeN:'photos/cafe_noir.jpg',cafeC:'photos/cafe_cappuccino.jpg',sandJ:'photos/sandwich_jambon.jpg',sandV:'photos/sandwich_vegetarien.jpg'};
+function dish(id,n,p,img){return {id,n,p,img:img||''};}
+function seed(){return{lang:'fr',theme:'light',u:null,users:[],seq:100,cart:{rid:null,items:{}},os:[],rs:[
+{id:1,n:'Tacos El Ali',c:'tacos',x:30,y:40,open:true,w:10,r:4.6,o:12,st:'ok',owner:null,desc:'Tacos grillés maison, sauces au choix.',d:[dish(1,'Tacos poulet',25,PHOTO.tacos),dish(2,'Tacos viande hachée',30,PHOTO.tacos),dish(3,'Tacos mixte',35,PHOTO.tacos),dish(4,'Coca-Cola 33cl',8,'')]},
+{id:2,n:'Pizza Roma',c:'pizza',x:56,y:52,open:true,w:18,r:4.7,o:14,st:'ok',owner:null,desc:'Pizzas au feu de bois, pâte fraîche.',d:[dish(1,'Pizza margherita',40,''),dish(2,'Pizza végétarienne',45,PHOTO.pizzaV),dish(3,'Pizza hawaïenne',55,PHOTO.pizzaH),dish(4,'Pizza roquette & noix',60,PHOTO.pizzaR),dish(5,'Pizza 4 fromages',65,'')]},
+{id:3,n:'Burger House',c:'burger',x:72,y:30,open:true,w:12,r:4.5,o:16,st:'ok',owner:null,desc:'Burgers artisanaux, viande grillée.',d:[dish(1,'Classic burger',40,PHOTO.burgerC),dish(2,'Cheeseburger',45,PHOTO.burgerF),dish(3,'Double burger',65,PHOTO.burgerF),dish(4,'Frites',15,'')]},
+{id:4,n:'Café Atlas',c:'cafe',x:38,y:72,open:true,w:5,r:4.8,o:9,st:'ok',owner:null,desc:'Café de spécialité, grains torréféiés sur place.',d:[dish(1,'Espresso',12,PHOTO.cafeE),dish(2,'Café noir',10,PHOTO.cafeN),dish(3,'Cappuccino',18,PHOTO.cafeC),dish(4,"Jus d'orange",12,'')]},
+{id:5,n:'Le Projet Sara',c:'sandwich',x:62,y:30,open:true,w:15,r:4.7,o:20,st:'ok',owner:null,desc:'Sandwichs frais composés chaque jour.',d:[dish(1,'Sandwich végétarien',22,PHOTO.sandV),dish(2,'Sandwich thon',18,''),dish(3,'Sandwich poulet',22,'')]},
+{id:6,n:'Bocadillo Plaza',c:'bocadillo',x:22,y:60,open:true,w:8,r:4.3,o:9,st:'ok',owner:null,desc:'Bocadillos espagnols au pain croustillant.',d:[dish(1,'Bocadillo jambon',28,PHOTO.sandJ),dish(2,'Bocadillo chorizo',25,''),dish(3,'Bocadillo poulet',27,'')]}
+]}}
+function seedOld2(){return null;}
+let D=null;try{D=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!D)D=seed();
+let S={tab:'',cat:'all',view:'list',max:'',sel:null,am:'login',msg:'',card:{},pay:'cash'};
+
+const sv=()=>{try{localStorage.setItem(K,JSON.stringify(D))}catch(e){}};
+const cur=()=>D.users.find(u=>u.id===D.u);
+const v=i=>document.getElementById(i).value;
+const L2={fr:{spin:"Lancer",ings:"Ingrédients gagnés",none:"aucun",lose:"Pas de chance, réessayez !",jack:"JACKPOT ! Triple symbole",pair:"Belle paire !"},ar:{spin:"ادر البكرات",ings:"المكونات المربوحة",none:"لا شيء",lose:"حظ أوفر، حاول مجدداً!",jack:"جاكبوت! ثلاثة رموز متطابقة",pair:"زوج رائع!"},en:{spin:"Spin",ings:"Ingredients won",none:"none",lose:"No luck, spin again!",jack:"JACKPOT! Triple symbol",pair:"Nice pair!"},es:{spin:"Girar",ings:"Ingredientes ganados",none:"ninguno",lose:"Sin suerte, ¡gira otra vez!",jack:"¡JACKPOT! Triple símbolo",pair:"¡Buena pareja!"}};
+const L3={fr:{slots:"Machine à sous",kit:"Cuisine",kstart:"Commencer (60 s)",kserve:"Servir",kclr:"Vider l'assiette",kguest:"Clients",ktime:"Temps",kwin:"Servi ! +",kwrong:"Mauvais plat : -10",kleft:"Client parti : -10",kover:"Fin du service ! Score ajouté :",krules:"Assemblez la commande de chaque client, puis servez-la avant qu'il parte. Plus il est servi vite, plus vous gagnez.",kempty:"Assiette vide",kagain:"Rejouer",ing_pain:"Pain",ing_galette:"Pâte",ing_fromage:"Fromage",ing_sauce:"Sauce",ing_viande:"Viande",ing_legumes:"Légumes"},ar:{slots:"ماكينة الحظ",kit:"المطبخ",kstart:"ابدأ (60 ثانية)",kserve:"قدّم",kclr:"فرّغ الطبق",kguest:"الزبائن",ktime:"الوقت",kwin:"تم التقديم! +",kwrong:"طبق خاطئ: -10",kleft:"غادر الزبون: -10",kover:"انتهت الخدمة! أُضيف النقاط:",krules:"جهّز طلب كل زبون وقدّمه قبل أن يغادر. كلما أسرعت كسبت أكثر.",kempty:"الطبق فارغ",kagain:"العب مجدداً",ing_pain:"خبز",ing_galette:"عجينة",ing_fromage:"جبن",ing_sauce:"صلصة",ing_viande:"لحم",ing_legumes:"خضار"},en:{slots:"Slot machine",kit:"Kitchen",kstart:"Start (60 s)",kserve:"Serve",kclr:"Clear plate",kguest:"Guests",ktime:"Time",kwin:"Served! +",kwrong:"Wrong dish: -10",kleft:"Guest left: -10",kover:"Service over! Score added:",krules:"Assemble each guest's order and serve it before they leave. The faster, the more you earn.",kempty:"Empty plate",kagain:"Play again",ing_pain:"Bread",ing_galette:"Dough",ing_fromage:"Cheese",ing_sauce:"Sauce",ing_viande:"Meat",ing_legumes:"Veggies"},es:{slots:"Tragamonedas",kit:"Cocina",kstart:"Empezar (60 s)",kserve:"Servir",kclr:"Vaciar plato",kguest:"Clientes",ktime:"Tiempo",kwin:"¡Servido! +",kwrong:"Plato incorrecto: -10",kleft:"Cliente se fue: -10",kover:"¡Servicio terminado! Puntos añadidos:",krules:"Prepara el pedido de cada cliente y sírvelo antes de que se vaya. Cuanto más rápido, más ganas.",kempty:"Plato vacío",kagain:"Jugar otra vez",ing_pain:"Pan",ing_galette:"Masa",ing_fromage:"Queso",ing_sauce:"Salsa",ing_viande:"Carne",ing_legumes:"Verduras"}};
+const L4={fr:{nomore:"Plus de parties aujourd'hui (2 max par jeu).",left:"Parties restantes aujourd'hui"},ar:{nomore:"انتهت محاولاتك لهذا اليوم (مرتان لكل لعبة).",left:"المحاولات المتبقية اليوم"},en:{nomore:"No plays left today (2 max per game).",left:"Plays left today"},es:{nomore:"Sin partidas por hoy (máx. 2 por juego).",left:"Partidas restantes hoy"}};
+const L5={fr:{rc:"Stagiaire/Client : Je commande",rs:"Vendeur : Je vends",rd:"Livreur : Je livre",fullname:"Nom complet",photo:"Photo de profil",upload:"Changer la photo",city:"Ville",bio:"Bio",save:"Enregistrer les modifications",accent:"Couleur de l'accent",fsize:"Taille du texte",radius:"Forme des coins",resetTheme:"Réinitialiser le thème",s1:"Petit",s2:"Normal",s3:"Grand",r1:"Carré",r2:"Arrondi",r3:"Très arrondi",rplat:"1 plat 25 DH",coupon:"Coupon",spinWheel:"Tourner la roulette (30 pts)",redeem:"Échanger mes 30 points",redeemRule:"À 30 points, réclamez un plat ou tournez la roulette. Vos points redescendent à zéro.",vouchers:"Mes coupons"},ar:{rc:"المتدرب/الزبون: أطلب",rs:"البائع: أبيع",rd:"الموصّل: أوصل",fullname:"الاسم الكامل",photo:"صورة الملف الشخصي",upload:"تغيير الصورة",city:"المدينة",bio:"نبذة",save:"حفظ التعديلات",accent:"لون التمييز",fsize:"حجم الخط",radius:"شكل الزوايا",resetTheme:"إعادة ضبط المظهر",s1:"صغير",s2:"عادي",s3:"كبير",r1:"مربّع",r2:"مستدير",r3:"مستدير جداً",rplat:"وجبة بقيمة 25 درهم",coupon:"كوبون",spinWheel:"أدر العجلة (30 نقطة)",redeem:"استبدل 30 نقطة",redeemRule:"عند 30 نقطة يمكنك طلب وجبة أو تدوير العجلة. تعود نقاطك إلى الصفر.",vouchers:"كوبوناتي"},en:{rc:"Trainee/Customer: I order",rs:"Seller: I sell",rd:"Driver: I deliver",fullname:"Full name",photo:"Profile photo",upload:"Change photo",city:"City",bio:"Bio",save:"Save changes",accent:"Accent colour",fsize:"Text size",radius:"Corner shape",resetTheme:"Reset theme",s1:"Small",s2:"Normal",s3:"Large",r1:"Square",r2:"Rounded",r3:"Very rounded",rplat:"1 dish 25 DH",coupon:"Coupon",spinWheel:"Spin the wheel (30 pts)",redeem:"Redeem my 30 points",redeemRule:"At 30 points, claim a dish or spin the wheel. Your points drop back to zero.",vouchers:"My coupons"},es:{rc:"Becario/Cliente: Pido",rs:"Vendedor: Vendo",rd:"Repartidor: Entrego",fullname:"Nombre completo",photo:"Foto de perfil",upload:"Cambiar foto",city:"Ciudad",bio:"Bio",save:"Guardar cambios",accent:"Color de acento",fsize:"Tamaño del texto",radius:"Forma de las esquinas",resetTheme:"Restablecer tema",s1:"Pequeño",s2:"Normal",s3:"Grande",r1:"Cuadrado",r2:"Redondeado",r3:"Muy redondeado",rplat:"1 plato 25 DH",coupon:"Cupón",spinWheel:"Girar la ruleta (30 pts)",redeem:"Canjear mis 30 puntos",redeemRule:"Al llegar a 30 puntos puedes reclamar un plato o girar la ruleta. Tus puntos vuelven a cero.",vouchers:"Mis cupones"}};
+const L6={fr:{fstep:"Étape",faction:"Action dans l'app",chooseRole:"Choisissez votre type de compte",bSell:"Je vends",bCust:"Je commande",bDriv:"Je livre",utype:"Type d'utilisateur",ur_sell:"Vendeur",ur_cust:"Client",ur_driv:"Livreur",ftT:"Police des titres",ftB:"Police du texte",fSerif:"Serif",fSans:"Sans-serif",fDeco:"Décorative",box:"Mystery box",quiz:"Quiz gourmand",boxRule:"Une boîte mystère par jour : score, coupon ou points de fidélité.",obox:"Ouvrir la boîte",boxNone:"Rien cette fois",dailyMsg:"Connexion quotidienne : +0.1 point de fidélité !",qok:"Bonne réponse !",qbad:"Mauvaise réponse. Bonne réponse :",qstreak:"5 bonnes réponses d'affilée : +0.2 point de fidélité !",qRule:"Répondez juste 5 fois de suite pour gagner 0.2 point de fidélité. Chaque bonne réponse rapporte 10 points de score.",qSerie:"Série"},ar:{fstep:"الخطوة",faction:"الإجراء في التطبيق",chooseRole:"اختر نوع حسابك",bSell:"أنا أبيع",bCust:"أنا أطلب",bDriv:"أنا أوصّل",utype:"نوع المستخدم",ur_sell:"بائع",ur_cust:"زبون",ur_driv:"موصّل",ftT:"خط العناوين",ftB:"خط النص",fSerif:"Serif",fSans:"Sans-serif",fDeco:"زخرفي"},ar:{box:"صندوق الغموض",quiz:"مسابقة الطعام",boxRule:"صندوق غامض واحد يومياً: نقاط أو كوبون أو نقاط ولاء.",obox:"افتح الصندوق",boxNone:"لا شيء هذه المرة",dailyMsg:"تسجيل دخول يومي: +0.1 نقطة ولاء!",qok:"إجابة صحيحة!",qbad:"إجابة خاطئة. الصحيحة:",qstreak:"5 إجابات صحيحة متتالية: +0.2 نقطة ولاء!",qRule:"أجب بشكل صحيح 5 مرات متتالية لتربح 0.2 نقطة ولاء. كل إجابة صحيحة تمنح 10 نقاط.",qSerie:"السلسلة"},en:{fstep:"Step",faction:"Action in the app",chooseRole:"Choose your account type",bSell:"I sell",bCust:"I order",bDriv:"I deliver",utype:"User type",ur_sell:"Seller",ur_cust:"Customer",ur_driv:"Driver",ftT:"Title font",ftB:"Text font",fSerif:"Serif",fSans:"Sans-serif",fDeco:"Decorative",box:"Mystery box",quiz:"Foodie Quiz",boxRule:"One mystery box a day: score, coupon or loyalty points.",obox:"Open the box",boxNone:"Nothing this time",dailyMsg:"Daily login: +0.1 loyalty point!",qok:"Correct!",qbad:"Wrong. Correct answer:",qstreak:"5 correct in a row: +0.2 loyalty point!",qRule:"Answer 5 questions correctly in a row to win 0.2 loyalty point. Each correct answer gives 10 score points.",qSerie:"Streak"},es:{fstep:"Paso",faction:"Acción en la app",chooseRole:"Elige tu tipo de cuenta",bSell:"Vendo",bCust:"Pido",bDriv:"Entrego",utype:"Tipo de usuario",ur_sell:"Vendedor",ur_cust:"Cliente",ur_driv:"Repartidor",ftT:"Fuente de títulos",ftB:"Fuente del texto",fSerif:"Serif",fSans:"Sans-serif",fDeco:"Decorativa",box:"Caja misteriosa",quiz:"Quiz gastronómico",boxRule:"Una caja misteriosa al día: puntos, cupón o puntos de fidelidad.",obox:"Abrir la caja",boxNone:"Nada esta vez",dailyMsg:"Acceso diario: +0.1 punto de fidelidad.",qok:"¡Correcto!",qbad:"Incorrecto. Respuesta:",qstreak:"5 aciertos seguidos: +0.2 puntos de fidelidad",qRule:"Acierta 5 preguntas seguidas para ganar 0.2 puntos de fidelidad. Cada acierto da 10 puntos.",qSerie:"Racha"}};
+const L7={fr:{rd_sell:"Gérer mon restaurant, mes plats et mes commandes",rd_cust:"Découvrir les restaurants et commander",rd_driv:"Accepter des missions et livrer",createAcc:"Créer mon compte",sign:"Se connecter",demo:"Accès démo : ouvrir un espace",simNote:"Démonstration : créez un compte ou utilisez un accès démo.",desc:"Description (visible par les clients)",client:"Client",custInfo:"Détails du client",cname:"Nom complet",cph:"Téléphone",addr:"Adresse de livraison",addrPh:"Rue, quartier, repère",pickLoc:"Touchez la carte pour placer le client",needAddr:"Ajoutez votre adresse et placez votre point sur la carte.",call:"Appeler",gmaps:"Google Maps",mapCust:"Carte des clients",drvBy:"Livreur"},ar:{rd_sell:"أدر مطعمي وأطباقي وطلباتي",rd_cust:"اكتشف المطاعم واطلب",rd_driv:"اقبل المهام وأوصل الطلبات",createAcc:"إنشاء حسابي",sign:"تسجيل الدخول",demo:"وصول تجريبي: افتح مساحة",simNote:"وضع تجريبي: أنشئ حساباً أو استخدم وصولاً تجريبياً.",desc:"الوصف (يراه العملاء)",client:"الزبون",custInfo:"تفاصيل الزبون",cname:"الاسم الكامل",cph:"الهاتف",addr:"عنوان التوصيل",addrPh:"الشارع، الحي، علامة مميزة",pickLoc:"امس الخريطة لتحديد موقع الزبون",needAddr:"أضف عنوانك وحدد نقطتك على الخريطة.",call:"اتصال",gmaps:"خرائط Google",mapCust:"خريطة الزبائن",drvBy:"الموصّل"},en:{rd_sell:"Manage my restaurant, dishes and orders",rd_cust:"Discover restaurants and order",rd_driv:"Accept missions and deliver",createAcc:"Create my account",sign:"Log in",demo:"Demo access: open a workspace",simNote:"Demo mode: create an account or use a demo access below.",desc:"Description (visible to customers)",client:"Customer",custInfo:"Customer details",cname:"Full name",cph:"Phone",addr:"Delivery address",addrPh:"Street, district, landmark",pickLoc:"Tap the map to place the customer",needAddr:"Add your address and place your point on the map.",call:"Call",gmaps:"Google Maps",mapCust:"Customer map",drvBy:"Driver"},es:{rd_sell:"Gestiona mi restaurante, platos y pedidos",rd_cust:"Descubre restaurantes y pide",rd_driv:"Acepta misiones y entrega",createAcc:"Crear mi cuenta",sign:"Iniciar sesión",demo:"Acceso demo: abrir un espacio",simNote:"Modo demo: crea una cuenta o usa un acceso demo.",desc:"Descripción (visible para clientes)",client:"Cliente",custInfo:"Detalles del cliente",cname:"Nombre completo",cph:"Teléfono",addr:"Dirección de entrega",addrPh:"Calle, barrio, referencia",pickLoc:"Toca el mapa para situar al cliente",needAddr:"Añade tu dirección y marca tu punto en el mapa.",call:"Llamar",gmaps:"Google Maps",mapCust:"Mapa de clientes",drvBy:"Repartidor"}};
+const L8={fr:{pay_m:"Mode de paiement",pay_card:"Carte Visa / Mastercard",pay_cash:"Espèces à la livraison",cc_name:"Nom sur la carte",cc_num:"Numéro de carte",cc_exp:"Expiration (MM/AA)",cc_cvc:"CVC",brand:"Marque",payInvalid:"Carte invalide : numéro valide, expiration MM/AA et CVC de 3 ou 4 chiffres.",payNote:"Démonstration : aucun paiement réel. En production, la carte est saisie chez un prestataire sécurisé (ex. Stripe ou CMI), jamais dans l'application. Carte test : 4242 4242 4242 4242.",payCashNote:"Le livreur encaisse le montant à la réception de votre commande.",viewRc:"Voir le reçu",dlRc:"Télécharger le reçu",rcTitle:"Reçu de commande",rcPaid:"Payé par carte (démo)",rcCash:"Espèces à payer au livreur",rcCollected:"Espèces encaissées",rcDate:"Date",rcCust:"Client",rcAddr:"Adresse",rcTotal:"Total",rcThanks:"Merci pour votre commande !",print:"Imprimer",dlNote:"Si le téléchargement est bloqué dans cet aperçu, le reçu s'affiche sous la commande.",toCollect:"À encaisser",paid:"Payé",collected:"Encaissé",eMode:"Paiement"},ar:{pay_m:"طريقة الدفع",pay_card:"بطاقة Visa / Mastercard",pay_cash:"نقداً عند التوصيل",cc_name:"الاسم على البطاقة",cc_num:"رقم البطاقة",cc_exp:"تاريخ الانتهاء (MM/YY)",cc_cvc:"رمز CVC",brand:"العلامة",payInvalid:"البطاقة غير صالحة: تحقق من الرقم وتاريخ الانتهاء MM/YY ورمز CVC من 3 أو 4 أرقام.",payNote:"عرض تجريبي: لا تتم عملية دفع حقيقية. في الإنتاج تُدخل البطاقة لدى مزود دفع آمن (مثل Stripe أو CMI) وليس داخل التطبيق. بطاقة تجريبية: 4242 4242 4242 4242.",payCashNote:"الموصّل يستلم المبلغ عند استلام طلبك.",viewRc:"عرض الإيصال",dlRc:"تحميل الإيصال",rcTitle:"إيصال الطلب",rcPaid:"مدفوع بالبطاقة (تجريبي)",rcCash:"نقداً للموصّل",rcCollected:"تم استلام النقد",rcDate:"التاريخ",rcCust:"الزبون",rcAddr:"العنوان",rcTotal:"المجموع",rcThanks:"شكراً على طلبك!",print:"طباعة",dlNote:"إذا تم حظر التحميل في هذه المعاينة، يظهر الإيصال أسفل الطلب.",toCollect:"للتحصيل",paid:"مدفوع",collected:"تم التحصيل",eMode:"الدفع"},en:{pay_m:"Payment method",pay_card:"Visa / Mastercard card",pay_cash:"Cash on delivery",cc_name:"Name on card",cc_num:"Card number",cc_exp:"Expiry (MM/YY)",cc_cvc:"CVC",brand:"Brand",payInvalid:"Invalid card: check the number, expiry MM/YY and a 3 or 4 digit CVC.",payNote:"Demo: no real payment is made. In production, card details go to a secure provider (e.g. Stripe or CMI), never into the app. Test card: 4242 4242 4242 4242.",payCashNote:"The driver collects the amount when your order arrives.",viewRc:"View receipt",dlRc:"Download receipt",rcTitle:"Order receipt",rcPaid:"Paid by card (demo)",rcCash:"Cash to pay the driver",rcCollected:"Cash collected",rcDate:"Date",rcCust:"Customer",rcAddr:"Address",rcTotal:"Total",rcThanks:"Thank you for your order!",print:"Print",dlNote:"If the download is blocked in this preview, the receipt appears under the order.",toCollect:"To collect",paid:"Paid",collected:"Collected",eMode:"Payment"},es:{pay_m:"Método de pago",pay_card:"Tarjeta Visa / Mastercard",pay_cash:"Efectivo al entregar",cc_name:"Nombre en la tarjeta",cc_num:"Número de tarjeta",cc_exp:"Caducidad (MM/AA)",cc_cvc:"CVC",brand:"Marca",payInvalid:"Tarjeta no válida: revisa el número, la caducidad MM/AA y un CVC de 3 o 4 dígitos.",payNote:"Demo: no se realiza ningún pago real. En producción, los datos de la tarjeta se introducen en un proveedor seguro (p. ej. Stripe o CMI), nunca en la app. Tarjeta de prueba: 4242 4242 4242 4242.",payCashNote:"El repartidor cobra el importe al recibir tu pedido.",viewRc:"Ver recibo",dlRc:"Descargar recibo",rcTitle:"Recibo del pedido",rcPaid:"Pagado con tarjeta (demo)",rcCash:"Efectivo para el repartidor",rcCollected:"Efectivo cobrado",rcDate:"Fecha",rcCust:"Cliente",rcAddr:"Dirección",rcTotal:"Total",rcThanks:"¡Gracias por tu pedido!",print:"Imprimir",dlNote:"Si la descarga está bloqueada en esta vista, el recibo aparece bajo el pedido.",toCollect:"Por cobrar",paid:"Pagado",collected:"Cobrado",eMode:"Pago"}};
+const L9={fr:{dishPhoto:"Photo réelle du plat (facultatif)",welcome:"Compte créé avec succès ! Bienvenue sur Appetite 🎉",loginOk:"Connexion réussie ✓",accOk:"Mission acceptée ✓ Rendez-vous chez le restaurant.",readyOk:"Commande marquée prête ✓",pickOk:"Récupération confirmée ✓",delOk:"Livraison confirmée ✓ Merci !",refOk:"Mission refusée.",dishOk:"Plat ajouté au menu ✓",tglOk:"Statut du restaurant mis à jour ✓",waitOk:"Temps d'attente enregistré ✓",dishDel:"Plat supprimé.",validOk:"Profil validé ✓"},ar:{dishPhoto:"صورة الطبق الحقيقية (اختياري)",welcome:"تم إنشاء الحساب بنجاح! مرحباً بك في Appetite 🎉",loginOk:"تم تسجيل الدخول ✓",accOk:"تم قبول المهمة ✓ توجّه إلى المطعم.",readyOk:"تم تحديد الطلب كجاهز ✓",pickOk:"تم تأكيد الاستلام ✓",delOk:"تم تأكيد التسليم ✓ شكراً!",refOk:"تم رفض المهمة.",dishOk:"تمت إضافة الطبق إلى القائمة ✓",tglOk:"تم تحديث حالة المطعم ✓",waitOk:"تم حفظ وقت الانتظار ✓",dishDel:"تم حذف الطبق.",validOk:"تم اعتماد الملف ✓"},en:{dishPhoto:"Real dish photo (optional)",welcome:"Account created! Welcome to Appetite 🎉",loginOk:"Logged in ✓",accOk:"Mission accepted ✓ Head to the restaurant.",readyOk:"Order marked ready ✓",pickOk:"Pickup confirmed ✓",delOk:"Delivery confirmed ✓ Thank you!",refOk:"Mission declined.",dishOk:"Dish added to the menu ✓",tglOk:"Restaurant status updated ✓",waitOk:"Wait time saved ✓",dishDel:"Dish removed.",validOk:"Profile approved ✓"},es:{dishPhoto:"Foto real del plato (opcional)",welcome:"¡Cuenta creada! Bienvenido a Appetite 🎉",loginOk:"Sesión iniciada ✓",accOk:"Misión aceptada ✓ Ve al restaurante.",readyOk:"Pedido marcado como listo ✓",pickOk:"Recogida confirmada ✓",delOk:"Entrega confirmada ✓ ¡Gracias!",refOk:"Misión rechazada.",dishOk:"Plato añadido al menú ✓",tglOk:"Estado del restaurante actualizado ✓",waitOk:"Tiempo de espera guardado ✓",dishDel:"Plato eliminado.",validOk:"Perfil aprobado ✓"}};
+const L10={fr:{c_burger:"Burgers",c_cafe:"Cafés",invCode:"Code d'invitation (facultatif)",inviteT:"Inviter un ami",inviteD:"Gagnez 1 DH de coupon pour chaque ami inscrit avec votre code, jusqu'à 5 DH.",copyInv:"Copier le lien d'invitation",copied:"Lien d'invitation copié ✓",accDeleted:"Votre compte a été supprimé.",delAcc:"Supprimer le compte",delWarn:"Action définitive : votre profil, vos restaurants et vos points seront supprimés.",delConfirm:"Confirmer la suppression",cancel:"Annuler",inviteCount:"amis invités",refDone:"Code d'invitation appliqué : 1 DH offert au parrain ✓"},ar:{c_burger:"برجر",c_cafe:"قهوة",invCode:"كود الدعوة (اختياري)",inviteT:"ادعُ صديقاً",inviteD:"اربح كوبوناً بقيمة 1 درهم عن كل صديق يسجل بكودك، حتى 5 دراهم.",copyInv:"نسخ رابط الدعوة",copied:"تم نسخ رابط الدعوة ✓",accDeleted:"تم حذف حسابك.",delAcc:"حذف الحساب",delWarn:"هذا الإجراء نهائي: سيتم حذف ملفك ومطاعمك ونقاطك.",delConfirm:"تأكيد الحذف",cancel:"إلغاء",inviteCount:"أصدقاء مدعوّون",refDone:"تم تطبيق كود الدعوة: كوبون 1 درهم للمُحيل ✓"},en:{c_burger:"Burgers",c_cafe:"Coffee",invCode:"Invite code (optional)",inviteT:"Invite a friend",inviteD:"Earn a 1 DH coupon for each friend who signs up with your code, up to 5 DH.",copyInv:"Copy invite link",copied:"Invite link copied ✓",accDeleted:"Your account has been deleted.",delAcc:"Delete account",delWarn:"This is permanent: your profile, restaurants and points will be deleted.",delConfirm:"Confirm deletion",cancel:"Cancel",inviteCount:"friends invited",refDone:"Invite code applied: 1 DH coupon for the referrer ✓"},es:{c_burger:"Hamburguesas",c_cafe:"Cafés",invCode:"Código de invitación (opcional)",inviteT:"Invita a un amigo",inviteD:"Gana un cupón de 1 DH por cada amigo que se registre con tu código, hasta 5 DH.",copyInv:"Copiar enlace de invitación",copied:"Enlace copiado ✓",accDeleted:"Tu cuenta ha sido eliminada.",delAcc:"Eliminar cuenta",delWarn:"Esta acción es definitiva: se borrarán tu perfil, restaurantes y puntos.",delConfirm:"Confirmar eliminación",cancel:"Cancelar",inviteCount:"amigos invitados",refDone:"Código aplicado: cupón de 1 DH para quien invitó ✓"}};
+const t=k=>(L10[D.lang]&&L10[D.lang][k])||(L9[D.lang]&&L9[D.lang][k])||(L8[D.lang]&&L8[D.lang][k])||(L7[D.lang]&&L7[D.lang][k])||(L6[D.lang]&&L6[D.lang][k])||(L5[D.lang]&&L5[D.lang][k])||(L4[D.lang]&&L4[D.lang][k])||(L3[D.lang]&&L3[D.lang][k])||(L2[D.lang]&&L2[D.lang][k])||(L[D.lang]&&L[D.lang][k])||L.en[k]||k;
+const minP=r=>r.d.length?Math.min(...r.d.map(d=>d.p)):0;
+const myRest=()=>D.rs.find(r=>r.owner===cur().id);
+
+function R(){
+ const th=D.th||{acc:'#FF5A1F',fs:15,rad:14};
+ document.documentElement.style.setProperty('--o',th.acc);
+ document.documentElement.style.setProperty('--r',th.rad+'px');
+ document.documentElement.style.setProperty('--ft',FONTS[th.ft||'serif']);
+ document.documentElement.style.setProperty('--fb',FONTS[th.fb||'sans']);
+ if(document.body)document.body.style.fontSize=th.fs+'px';
+ document.documentElement.dir=D.lang==='ar'?'rtl':'ltr';
+ document.documentElement.lang=D.lang;
+ document.documentElement.dataset.theme=D.theme;
+ if(cur())dailyCheck();
+ document.getElementById('app').innerHTML=cur()?mainV():authV();
+ if(S.msg&&S.msg!==S.shown){S.shown=S.msg;TOAST(S.msg);}
+}
+function go(k){S.tab=k;S.sel=null;S.msg='';R()}
+function logIn(u){D.u=u.id;S.tab=DEF[u.role];S.sel=null;S.msg=S.pend||'';S.pend='';sv();R()}
+function mk(name,email,pass,phone,role){
+ role=role||'cust';
+ const u={id:++D.seq,name,email,pass,phone,role,pts:0,cp:0,earn:0,ref:[]};
+ if(role==='sell'){const r={id:++D.seq,n:name+' (nouveau)',c:'sandwich',x:50,y:50,open:false,w:10,r:0,o:0,st:'pend',owner:u.id,d:[]};D.rs.push(r)}
+ D.users.push(u);return u;
+}
+
+/* ---------- AUTH ---------- */
+function authOld(){
+ const am=S.am;
+ if(am==='forgot')return `<main><div class="center">${LOGO}<h2>${t('forgot')}</h2></div>
+ <div class="card"><input id="e" placeholder="${t('email')}"><button style="width:100%" onclick="A('reset')">${t('reset')}</button>
+ <p class="m">${S.msg}</p><button class="g s" onclick="S.am='login';S.msg='';R()">←</button></div></main>`;
+ const su=am==='signup';
+ return `<main><div class="center">${LOGO}<h2>Appetite</h2><p class="m">${t('tag')}</p>
+ <select style="width:auto" onchange="D.lang=this.value;sv();R()">${Object.keys(L).map(k=>`<option value="${k}" ${k===D.lang?'selected':''}>${LN[k]}</option>`).join('')}</select>
+ <button class="g s" onclick="A('theme')">◐</button></div>
+ <div class="card">
+ ${su?`<input id="n" placeholder="${t('name')}"><input id="ph" placeholder="${t('phone')}">`:''}
+ <input id="e" type="email" placeholder="${t('email')}"><input id="p" type="password" placeholder="${t('pass')}">
+ ${su?`<p class="m center">${t('chooseRole')}</p><div style="display:grid;gap:8px;margin-top:6px"><button onclick="A('auth','sell')">${t('bSell')}</button><button onclick="A('auth','cust')">${t('bCust')}</button><button onclick="A('auth','driv')">${t('bDriv')}</button></div>`:''}
+ ${su?'':`<button style="width:100%" onclick="A('auth')">${t('login')}</button>`}
+ ${su?'':`<p class="m" style="cursor:pointer" onclick="S.am='forgot';S.msg='';R()">${t('forgot')}</p>`}
+ <p class="center m" style="cursor:pointer" onclick="S.am='${su?'login':'signup'}';S.msg='';R()">${su?t('login'):t('signup')}</p>
+ </div>
+ <div class="card"><button class="g" style="width:100%" onclick="A('social','gmail')">${t('google')}</button>
+ <button class="g" style="width:100%;margin-top:8px" onclick="A('social','apple')">${t('apple')}</button>
+ <p class="m">${S.msg}</p></div></main>`;
+}
+
+/* ---------- MAIN SHELL ---------- */
+function mainV(){
+ const me=cur();
+ const body=S.tab==='profile'?profV():me.role==='cust'?custV():me.role==='sell'?sellV():drivV();
+ return `<header>${LOGO}<b>Appetite</b>
+ <select style="width:auto;padding:4px;margin:0" onchange="D.lang=this.value;sv();R()">${Object.keys(L).map(k=>`<option value="${k}" ${k===D.lang?'selected':''}>${LN[k]}</option>`).join('')}</select>
+ <button class="g s" onclick="A('theme')">◐</button></header>
+ <main>${S.msg?`<div class="card">${S.msg}</div>`:''}${body}</main>
+ <nav>${NAV[me.role].map(([k,l])=>`<button class="${S.tab===k?'on':''}" onclick="go('${k}')">${IC(NAVIC[k]||'home',20)}<br>${t(l)}</button>`).join('')}</nav>`;
+}
+
+/* ---------- CUSTOMER (stagiaire) ---------- */
+function custV(){
+ switch(S.tab){
+  case 'home':return homeC();
+  case 'game':return gameSwitch()+gameBody()+cartV();
+  case 'orders':return ordersC();
+  case 'loyal':return loyalV();
+  default:return profV();
+ }
+}
+function homeC(){
+ if(S.sel)return restV(S.sel);
+ const cats=['all','pizza','burger','tacos','sandwich','bocadillo','cafe'];
+ const ok=D.rs.filter(r=>r.st==='ok'&&(S.cat==='all'||r.c===S.cat)&&(!S.max||minP(r)<=+S.max));
+ const reco=D.rs.filter(r=>r.st==='ok').sort((a,b)=>b.o-a.o).slice(0,2);
+ return `${BANNER()}<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${cats.map(c=>`<div onclick="S.cat='${c}';R()" style="cursor:pointer;text-align:center;padding:6px 4px;border-radius:14px;border:2px solid ${S.cat===c?'var(--o)':'var(--l)'};background:var(--c)"><div class="ic" style="width:48px;height:48px;margin:0 auto">${IMG[c]}</div><div style="font-size:12px;margin-top:4px">${c==='all'?t('all'):t('c_'+c)}</div></div>`).join('')}</div>
+ <div class="row" style="margin-top:8px"><input id="mx" style="width:55%" type="number" placeholder="${t('maxp')}" value="${S.max}" onchange="S.max=this.value;R()">
+ <span><span class="chip ${S.view==='list'?'on':''}" onclick="S.view='list';R()">${t('list')}</span><span class="chip ${S.view==='map'?'on':''}" onclick="S.view='map';R()">${t('map')}</span></span></div>
+ <h2>${t('reco')}</h2>${reco.map(restCard).join('')}
+ <h2>${t('near')}</h2>${S.view==='map'?mapV(ok):ok.map(restCard).join('')}`;
+}
+function restCard(r){return `<div class="card" style="cursor:pointer" onclick="S.sel=${r.id};R()"><div style="display:flex;gap:12px;align-items:center"><span class="ic" style="width:64px;height:64px;flex:none">${IMG[r.c]}</span><div style="flex:1"><div class="row"><b>${r.n}</b><span class="tag ${r.open?'ok':''}">${r.open?t('open'):t('closed')}</span></div>
+ <div class="m">★ ${r.r} · ${r.w} ${t('min')} · ${t('c_'+r.c)} · ${minP(r)} MAD+</div></div></div></div>`}
+function mapV(l){return `<svg class="map" viewBox="0 0 100 100">
+ <rect width="100" height="100" fill="#E9EEE3"/>
+ <g fill="#D7E8C8"><rect x="4" y="66" width="22" height="26" rx="2"/><rect x="66" y="8" width="26" height="20" rx="2"/></g>
+ <path d="M0 60Q40 40 100 58" stroke="#F4D35E" stroke-width="2" fill="none"/>
+ <g stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"><path d="M0 50H100"/><path d="M50 0V100"/><path d="M0 22L100 30"/><path d="M18 0L30 100"/><path d="M0 80L100 72"/><path d="M80 0L72 100"/></g>
+ <text x="50" y="46" font-size="3.2" text-anchor="middle" fill="#666">CMC</text>
+ <circle cx="50" cy="50" r="11" fill="#4285F4" opacity=".18"/><circle cx="50" cy="50" r="5" fill="#4285F4" stroke="#fff" stroke-width="1.5"/>
+ ${l.map(r=>`<g style="cursor:pointer" onclick="S.sel=${r.id};R()"><circle cx="${r.x}" cy="${r.y}" r="4.2" fill="${r.open?'#FF5A1F':'#777'}" stroke="#fff" stroke-width="1.2"/><text x="${r.x}" y="${r.y-6}" font-size="3.4" font-weight="700" text-anchor="middle" fill="#222" stroke="#fff" stroke-width=".8" paint-order="stroke">${r.n}</text></g>`).join('')}</svg>
+ <p class="m">${D.lang==='ar'?'خريطة تخطيطية للحي (الخرائط الحقيقية غير متاحة في هذه المعاينة)':'Schematic district map (live map tiles unavailable in this preview)'}</p>`}
+function restV(id){
+ const r=D.rs.find(x=>x.id==id);
+ return `<button class="g s" onclick="S.sel=null;R()">${IC('back')}</button><h2>${r.n}</h2><p class="m">${r.desc||''}</p>
+ <p class="m">★ ${r.r} · ${r.open?t('open'):t('closed')} · ${t('wait')}: ${r.w} · <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.n+' Fès')}" target="_blank" style="color:var(--o)">Google Maps ↗</a></p>
+ ${r.d.map(d=>`<div class="card row" style="justify-content:flex-start;gap:12px">${dishImg(d,r)}<span style="flex:1">${d.n} — ${d.p} MAD</span><button class="s" onclick="A('add',${r.id},${d.id})">${IC('add')} ${t('add')}</button></div>`).join('')}
+ ${cartV()}`;
+}
+const TOP=[['Fromage',8,6],['Poulet',10,8],['Thon',8,6],['Œuf',6,4],['Olives',5,3],['Oignons',3,2],['Harissa',4,0],['Mayo',4,1]];
+const onTP=i=>{const e=document.getElementById('tp'+i);return !!(e&&e.checked)};
+function calc(){
+ const sel=TOP.map((x,i)=>onTP(i)?x:null).filter(Boolean);
+ const bonus=sel.length>=5?150:sel.length>=3?50:0;
+ const pts=20+sel.reduce((s,x)=>s+x[1],0)+bonus;
+ const price=sel.reduce((s,x)=>s+x[2],0);
+ const b=(document.getElementById('gd')?v('gd'):'').split('|');
+ return{pts,price,b,sel,bonus};
+}
+const RS=[['pizza',30],['tacos',25],['sandwich',20],['bocadillo',15],['plat',12],['snack',8],['boisson',5]];
+const RV=Object.fromEntries(RS);
+let spinning=false;
+const reelCell=k=>`<div class="reel-s ic">${IMG[k]}</div>`;
+function gameReel(){
+ const me=cur(),sc=me.score||0,best=me.best||0;
+ const opts=D.rs.filter(r=>r.st==='ok').flatMap(r=>r.d.map(d=>`<option value="${r.id}|${d.id}|${d.p}|${d.n}">${r.n} — ${d.n} (${d.p} MAD)</option>`)).join('');
+ const fin=S.reel||['pizza','pizza','pizza'],ings=S.ings||[];
+ return `<h2>${t('game')}</h2><p class="m">${t('gameDesc')}</p>
+ <div class="card"><div class="row"><div><div class="m">${t('score')}</div><b style="font-size:26px;color:var(--o)">${sc}</b></div>
+ <div style="text-align:end"><div class="m">${t('best')}</div><b>${best}</b></div></div>
+ <div class="bar" style="margin-top:10px"><i style="width:${Math.min(100,sc/10)}%"></i></div>
+ ${sc>=1000?`<button style="width:100%;margin-top:10px" onclick="A('claim')">${t('claim')}</button>`:`<p class="m">${t('toClaim')}</p>`}</div>
+ <div class="card"><div class="reels">${[0,1,2].map(i=>`<div class="reel" id="rl${i}">${reelCell(fin[i])}</div>`).join('')}</div>
+ <p id="rmsg" class="center" style="font-weight:700;min-height:24px;margin:10px 0">${S.rmsg||''}</p><p class="m center">${t('left')}: ${plays('slots')}/2</p>
+ <button id="spinb" style="width:100%;font-size:18px;padding:14px" onclick="SPIN()">🎰 ${t('spin')}</button></div>
+ <div class="card"><label class="m">${t('pick')}</label><select id="gd">${opts}</select>
+ <p class="m" style="margin-top:8px">${t('ings')}: ${ings.length?ings.map(k=>`<span class="tag">${t('c_'+k)}</span>`).join(' '):t('none')}</p>
+ <div class="row" style="margin-top:8px"><button onclick="A('mkplate')">${t('addCart')}</button><button class="g s" onclick="A('clearIng')">✕</button></div></div>`;
+}
+function SPIN(){
+ if(spinning||plays('slots')<=0)return;
+ spinning=true;S.rmsg='';usePlay('slots');
+ const b=document.getElementById('spinb');if(b)b.disabled=true;
+ const fin=[0,1,2].map(()=>RS[Math.floor(Math.random()*RS.length)][0]);
+ const stops=[900,1400,1900];
+ const tm=[0,1,2].map(i=>setInterval(()=>{const el=document.getElementById('rl'+i);if(el)el.innerHTML=reelCell(RS[Math.floor(Math.random()*RS.length)][0]);},70));
+ [0,1,2].forEach(i=>setTimeout(()=>{
+  clearInterval(tm[i]);
+  const el=document.getElementById('rl'+i);if(el)el.innerHTML=reelCell(fin[i]);
+  if(i===2)done(fin);
+},stops[i]));
+}
+function done(f){
+ const me=cur();
+ if(!me){spinning=false;return;}
+ const cnt={};f.forEach(k=>cnt[k]=(cnt[k]||0)+1);
+ const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+ let pts=0,win=null,msg=t('lose');
+ if(top[1]===3){win=f[0];pts=RV[win]*10;msg=t('jack');}
+ else if(top[1]===2){win=top[0];pts=RV[win]*2;msg=t('pair');}
+ S.reel=f;
+ if(win)S.ings=(S.ings||[]).concat(win);
+ if(pts){me.score=(me.score||0)+pts;me.best=Math.max(me.best||0,me.score);}
+ S.rmsg=pts?`+${pts} ${t('gained')}`:msg;
+ spinning=false;sv();R();
+}
+const REC={pizza:['galette','sauce','fromage'],tacos:['galette','viande','legumes'],sandwich:['pain','fromage','legumes'],bocadillo:['pain','viande','sauce']};
+const ICO={pain:'🍞',galette:'🫣',fromage:'🧀',sauce:'🥫',viande:'🍖',legumes:'🥬'};
+let KG=null;
+function gameSwitch(){return `<div class="row" style="justify-content:center;gap:8px;margin-bottom:8px">${[['slots','🎰'],['kit','🍳']].concat([['box','🎁'],['quiz','🧠']]).map(([k,e])=>`<span class="chip ${(S.gm||'slots')===k?'on':''}" onclick="S.gm='${k}';R()">${e} ${t(k)}</span>`).join('')}</div>`}
+function kitchenV(){
+ const ing=(id)=>KG&&KG.on?'':'';
+ let bottom;
+ if(KG&&KG.on)bottom='';
+ else if(KG&&KG.over)bottom=`<div class="card center"><b>${t('kover')} ${KG.tot}</b><button style="width:100%;margin-top:8px" onclick="KINIT()">${t('kagain')}</button></div>`;
+ else bottom=plays('kit')<=0?`<p class="m center">${t('nomore')}</p>`:`<button style="width:100%" onclick="KINIT()">${t('kstart')}</button>`;
+ return `<h2>${t('kit')}</h2><p class="m">${t('krules')}</p><p class="m center">${t('left')}: ${plays('kit')}/2</p>
+ <div class="card row"><span>${t('ktime')}: <b id="kt">60</b> s</span><span>${t('score')}: <b id="ks">0</b></span></div>
+ <div class="card"><div class="m">${t('kguest')}</div><div id="kg" style="display:flex;gap:8px;flex-wrap:wrap;min-height:90px;margin-top:6px"></div></div>
+ <div class="card"><div class="m">${t('kplate')}</div><div id="kp" class="row" style="justify-content:flex-start;min-height:34px;margin-top:6px"></div>
+ <div class="row" style="margin-top:8px"><button onclick="KSERVE()">${t('kserve')}</button><button class="g" onclick="KCLR()">${t('kclr')}</button></div>
+ <div id="kmsg" class="m" style="min-height:20px;margin-top:6px"></div></div>
+ <div class="card"><div class="row" style="gap:6px">${Object.keys(ICO).map(k=>`<button class="g" style="flex:1;min-width:90px" onclick="KADD('${k}')">${ICO[k]} ${t('ing_'+k)}</button>`).join('')}</div></div>
+ ${bottom}`;
+}
+function KINIT(){
+ if(plays('kit')<=0)return;
+ usePlay('kit');
+ if(KG){clearInterval(KG.tick);clearInterval(KG.spawn);}
+ KG={on:true,over:false,t:60,score:0,plate:[],guests:[],id:0,tot:0,msg:''};
+ KG.tick=setInterval(KTICK,1000);
+ KG.spawn=setInterval(KSPAWN,3500);
+ KSPAWN();R();KDRAW();
+}
+function KSPAWN(){
+ if(!KG||!KG.on)return;
+ if(KG.guests.length<4){const k=Object.keys(REC);KG.guests.push({id:++KG.id,r:k[Math.floor(Math.random()*k.length)],pat:100});}
+ KDRAW();
+}
+function KTICK(){
+ if(!KG||!KG.on)return;
+ KG.t--;
+ KG.guests.forEach(g=>g.pat-=4);
+ const gone=KG.guests.filter(g=>g.pat<=0).length;
+ if(gone){KG.score=Math.max(0,KG.score-10*gone);KG.msg=t('kleft');}
+ KG.guests=KG.guests.filter(g=>g.pat>0);
+ if(KG.t<=0)return KEND();
+ KDRAW();
+}
+function KADD(k){if(!KG||!KG.on||KG.plate.length>=4)return;KG.plate.push(k);KDRAW();}
+function KCLR(){if(!KG)return;KG.plate=[];KDRAW();}
+function KSERVE(){
+ if(!KG||!KG.on||!KG.plate.length)return;
+ const p=[...KG.plate].sort().join(',');
+ const ms=KG.guests.filter(g=>[...REC[g.r]].sort().join(',')===p).sort((a,b)=>a.pat-b.pat)[0];
+ if(ms){const pts=20+Math.round(ms.pat/10);KG.score+=pts;KG.guests=KG.guests.filter(g=>g!==ms);KG.msg=t('kwin')+pts;}
+ else{KG.score=Math.max(0,KG.score-10);KG.msg=t('kwrong');}
+ KG.plate=[];KDRAW();
+}
+function KDRAW(){
+ if(!KG)return;
+ const $=id=>document.getElementById(id);
+ if($('kt'))$('kt').textContent=KG.t;
+ if($('ks'))$('ks').textContent=KG.score;
+ if($('kg'))$('kg').innerHTML=KG.guests.map(g=>`<div class="card" style="margin:0;flex:1;min-width:110px;padding:8px"><div class="ic" style="width:44px;height:44px;margin:auto">${IMG[g.r]}</div><div class="center" style="font-size:12px"><b>${t('c_'+g.r)}</b><br>${REC[g.r].map(k=>ICO[k]).join(' ')}</div><div class="bar"><i style="width:${g.pat}%;background:${g.pat<30?'#d33':'var(--o)'}"></i></div></div>`).join('')||'<span class="m">—</span>';
+ if($('kp'))$('kp').innerHTML=KG.plate.map(k=>`<span class="tag">${ICO[k]} ${t('ing_'+k)}</span>`).join(' ')||`<span class="m">${t('kempty')}</span>`;
+ if($('kmsg'))$('kmsg').textContent=KG.msg||'';
+}
+function KEND(){
+ clearInterval(KG.tick);clearInterval(KG.spawn);
+ KG.on=false;KG.over=true;KG.tot=KG.score;
+ const me=cur();
+ if(me&&KG.score){me.score=(me.score||0)+KG.score;me.best=Math.max(me.best||0,me.score);}
+ sv();R();
+}
+const FLOW={
+fr:{x:"Fonctionnalités secondaires",sell:{t:"Parcours du vendeur (Je vends)",steps:[["Inscription","Créez votre compte Vendeur : votre restaurant apparaît en attente."],["Validation","L'administration valide votre profil avant la mise en ligne (onglet Commandes)."],["Mise à jour de l'offre","Ajoutez, modifiez ou supprimez vos plats et prix (onglet Menu)."],["Réception des commandes","Faites passer chaque commande de Nouvelle à Prête (onglet Commandes)."],["Suivi de l'affluence","Ouvrez ou fermez votre restaurant et réglez le temps d'attente (onglet Statut)."]],extra:["Profil à compléter : corrigez vos informations dans Profil.","Gestion du rush de midi : ajustez l'attente et le statut ouvert/fermé."]},cust:{t:"Parcours du stagiaire (Je commande)",steps:[["Localisation","Découvrez les restaurants proches, en liste ou sur la carte (onglet Accueil)."],["Choix du mode","Mode classique (catégories, liste) ou mode jeu (onglet Jeu)."],["Recherche ou composition","Filtrez par catégorie et par prix, ou composez votre plat en jeu."],["Commande et récupération","Ajoutez au panier, commandez, puis suivez la progression (onglet Commandes)."],["Points","Gagnez des points de fidélité et réclamez votre récompense (onglet Fidélité)."]],extra:["Mode classique : catégories, filtre par prix, carte.","Mode jeu : machine à sous et cuisine, 2 parties par jour."]},driv:{t:"Parcours du livreur (Je livre)",steps:[["Inscription","Créez votre compte Livreur."],["Mission","Consultez les missions avec gain et temps estimé, puis acceptez (onglet Missions)."],["Récupération","Allez chez le restaurant et confirmez la récupération quand la commande est prête (onglet En cours)."],["Livraison","Livrez le client et confirmez la livraison (onglet En cours)."],["Gains","Consultez vos gains et vos évaluations (onglet Gains)."]],extra:["Refus d'une mission : elle ne vous sera plus proposée.","Commande pas prête : attendez, le statut se met à jour."]}},
+ar:{x:"المهام الثانوية",sell:{t:"مسار البائع (أبيع)",steps:[["التسجيل","أنشئ حساب البائع، ويظهر مطعمك بانتظار الموافقة."],["المصادقة","توافق الإدارة على ملفك قبل النشر (تبويب الطلبات)."],["تحديث العرض","أضف أطباقك وأسعارها أو عدّلها أو احذفها (تبويب القائمة)."],["استقبال الطلبات","حوّل كل طلب من جديد إلى جاهز (تبويب الطلبات)."],["متابعة الإقبال","افتح مطعمك أو أغلقه واضبط وقت الانتظار (تبويب الحالة)."]],extra:["استكمال الملف الشخصي: عدّل بياناتك في الملف.","إدارة ذروة الغداء: اضبط وقت الانتظار والحالة."]},cust:{t:"مسار المتدرب (أطلب)",steps:[["الموقع","اكتشف المطاعم القريبة في القائمة أو على الخريطة (تبويب الرئيسية)."],["اختيار الوضع","الوضع الكلاسيكي (الفئات والقائمة) أو وضع اللعب (تبويب اللعبة)."],["البحث أو التركيب","صفّ حسب الفئة والسعر، أو رّكب طبقك في اللعب."],["الطلب والاستلام","أضف إلى السلة واطلب، ثم تابع التقدم (تبويب الطلبات)."],["النقاط","اكسب نقاط الولاء واطلب مكافأتك (تبويب الولاء)."]],extra:["الوضع الكلاسيكي: الفئات، فلتر السعر، القائمة.","وضع اللعب: آلة الحظ والمطبخ، مرتان يومياً."]},driv:{t:"مسار الموصّل (أوصل)",steps:[["التسجيل","أنشئ حساب الموصّل."],["المهمة","اطّلع على المهام مع الربح والوقت المقدّر، ثم اقبل (تبويب المهام)."],["الاستلام","اذهب إلى المطعم وأكد الاستلام عندما تكون الطلبية جاهزة (تبويب قيد التنفيذ)."],["التسليم","سلّم الطلب للزبون وأكد التسليم (تبويب قيد التنفيذ)."],["الأرباح","اطّلع على أرباحك وتقييماتك (تبويب الأرباح)."]],extra:["رفض مهمة: لن تُعرض عليك مجدداً.","الطلب غير جاهز: انتظر، وسيتحدث العرض."]}},
+en:{x:"Secondary features",sell:{t:"Seller journey (I sell)",steps:[["Sign up","Create your seller account; your restaurant appears as pending."],["Validation","The admin validates your profile before it goes live (Orders tab)."],["Update the offer","Add, edit or remove dishes and prices (Menu tab)."],["Receive orders","Move each order from New to Ready (Orders tab)."],["Monitor demand","Open or close your restaurant and set the wait time (Status tab)."]],extra:["Complete your profile: fix your details in Profile.","Lunch rush: adjust wait time and open/closed status."]},cust:{t:"Trainee / customer journey (I order)",steps:[["Discover","Browse nearby restaurants in a list or on the map (Home tab)."],["Choose a mode","Classic mode (categories, list) or game mode (Game tab)."],["Search or compose","Filter by category and price, or build your dish in the game."],["Order and pick up","Add to cart, order, then follow progress (Orders tab)."],["Points","Earn loyalty points and claim your reward (Loyalty tab)."]],extra:["Classic mode: categories, price filter, map.","Game mode: slot machine and kitchen, 2 plays per day each."]},driv:{t:"Driver journey (I deliver)",steps:[["Sign up","Create your driver account."],["Mission","See missions with earnings and estimated time, then accept (Missions tab)."],["Pickup","Go to the restaurant and confirm pickup once the order is ready (Active tab)."],["Delivery","Deliver to the customer and confirm delivery (Active tab)."],["Earnings","Check your earnings and ratings (Earnings tab)."]],extra:["Refusing a mission: you won't be offered it again.","Order not ready: wait, the status updates automatically."]}},
+es:{x:"Funciones secundarias",sell:{t:"Recorrido del vendedor (Vendo)",steps:[["Registro","Crea tu cuenta de vendedor; tu restaurante aparece como pendiente."],["Validación","La administración valida tu perfil antes de publicarlo (pestaña Pedidos)."],["Actualizar la oferta","Añade, edita o elimina platos y precios (pestaña Menú)."],["Recibir pedidos","Pasa cada pedido de Nuevo a Listo (pestaña Pedidos)."],["Seguimiento de la demanda","Abre o cierra tu restaurante y ajusta el tiempo de espera (pestaña Estado)."]],extra:["Completar perfil: corrige tus datos en Perfil.","Hora punta de almuerzo: ajusta la espera y el estado abierto/cerrado."]},cust:{t:"Recorrido del becario / cliente (Pido)",steps:[["Localización","Descubre restaurantes cercanos en lista o en el mapa (pestaña Inicio)."],["Elegir modo","Modo clásico (categorías, lista) o modo juego (pestaña Juego)."],["Búsqueda o composición","Filtra por categoría y precio, o compón tu plato en el juego."],["Pedido y recogida","Añade al carrito, pide y sigue el progreso (pestaña Pedidos)."],["Puntos","Gana puntos de fidelidad y reclama tu recompensa (pestaña Fidelidad)."]],extra:["Modo clásico: categorías, filtro de precio, mapa.","Modo juego: tragamonedas y cocina, 2 partidas al día cada una."]},driv:{t:"Recorrido del repartidor (Entrego)",steps:[["Registro","Crea tu cuenta de repartidor."],["Misión","Consulta misiones con ganancia y tiempo estimado, y acepta (pestaña Misiones)."],["Recogida","Ve al restaurante y confirma la recogida cuando el pedido esté listo (pestaña En curso)."],["Entrega","Entrega al cliente y confirma la entrega (pestaña En curso)."],["Ganancias","Revisa tus ganancias y valoraciones (pestaña Ganancias)."]],extra:["Rechazar una misión: no volverá a aparecer.","Pedido no listo: espera, el estado se actualiza solo."]}}
+};
+function flowBody(r){const F=(FLOW[D.lang]||FLOW.en)[r];return `<h2 style="font-size:16px">${F.t}</h2>${F.steps.map((s,i)=>`<div style="margin:8px 0"><div class="row" style="justify-content:flex-start;gap:8px"><span class="tag">${i+1}</span><b>${s[0]}</b></div><div class="m" style="margin-top:4px">${s[1]}</div></div>`).join('')}<div class="m" style="margin-top:10px"><b>${(FLOW[D.lang]||FLOW.en).x}</b></div>${F.extra.map(e=>`<div class="m" style="margin-top:4px">• ${e}</div>`).join('')}`}
+function flowAll(role){const order=[role,...['sell','cust','driv'].filter(r=>r!==role)];return order.map((r,i)=>`<details class="card" ${i===0?'open':''}><summary style="cursor:pointer;font-weight:600">${(FLOW[D.lang]||FLOW.en)[r].t}</summary><div style="margin-top:8px">${flowTable(r)}</div></details>`).join('')}
+const RW=[['plat',25],['coupon',5],['coupon',10],['coupon',15],['coupon',20],['pts',1],['pts',3],['pts',5],['pts',7],['pts',10],['pts',15],['pts',20],['pts',30]];
+const WC=['#FF5A1F','#FFB703','#2EC4B6','#E76F51','#8AC926','#6A4C93','#1982C4','#FF7096','#F4A261','#00B4D8','#9B5DE5','#EF233C','#06D6A0'];
+let WROT=0,RSP=false;
+function prizeLabel(p){return p[0]==='plat'?t('rplat'):p[0]==='coupon'?`${t('coupon')} ${p[1]} DH`:`${p[1]} ${t('pts')}`}
+function wheelV(){
+ const n=RW.length,s=360/n;
+ return `<div class="card center"><div style="position:relative;width:260px;height:260px;margin:auto"><div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:26px;z-index:2">▼</div>
+ <svg id="wheel" viewBox="-100 -100 200 200" width="260" height="260" style="transition:transform 4s cubic-bezier(.2,.7,.2,1);transform:rotate(${WROT}deg)">
+ ${RW.map((p,i)=>{const a0=(i*s-90)*Math.PI/180,a1=((i+1)*s-90)*Math.PI/180;const th=((i+.5)*s-90);const x0=Math.cos(a0)*95,y0=Math.sin(a0)*95,x1=Math.cos(a1)*95,y1=Math.sin(a1)*95;return `<path d="M0 0L${x0} ${y0}A95 95 0 0 1 ${x1} ${y1}Z" fill="${WC[i]}" stroke="#fff" stroke-width="1"/><text transform="translate(${Math.cos(th*Math.PI/180)*62} ${Math.sin(th*Math.PI/180)*62}) rotate(${th})" text-anchor="middle" font-size="6.5" fill="#fff" font-weight="700">${prizeLabel(p)}</text>`}).join('')}
+ <circle r="12" fill="#222"/></svg></div>
+ <p class="m" style="margin-top:8px">${S.rwmsg||''}</p></div>`;
+}
+function RSPIN(){
+ const me=cur();
+ if(!me||(me.pts||0)<30||RSP)return;
+ RSP=true;me.pts=0;sv();
+ const n=RW.length,s=360/n,i=Math.floor(Math.random()*n);
+ WROT=Math.ceil(WROT/360)*360+360*5+(360-(i+.5)*s);
+ const w=document.getElementById('wheel');if(w)w.style.transform=`rotate(${WROT}deg)`;
+ const b=document.getElementById('spinW');if(b)b.disabled=true;
+ setTimeout(()=>RWIN(i),4100);
+}
+function RWIN(i){
+ const me=cur();RSP=false;if(!me)return;
+ const pr=RW[i];
+ if(pr[0]==='pts')me.pts=Math.min(30,(me.pts||0)+pr[1]);
+ else me.vch=(me.vch||[]).concat(pr[1]);
+ S.rwmsg=prizeLabel(pr);
+ sv();R();
+}
+function PHOTOUP(inp){
+ const f=inp.files&&inp.files[0];if(!f)return;
+ const fr=new FileReader();
+ fr.onload=()=>{const im=new Image();im.onload=()=>{const sc=160/Math.max(im.width,im.height);const c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const me=cur();if(me){me.photo=c.toDataURL('image/jpeg',.8);sv();R();}};im.src=fr.result;};
+ fr.readAsDataURL(f);
+}
+const BOXP=[['score',20],['score',50],['score',100],['coupon',5],['pts',0.1],['pts',0.2],['pts',0.5],['none',0]];
+let BXO=false;
+const QUIZ=[
+{o:['Tajine','Couscous','Pastilla','Harira'],c:0,q:{fr:"Quel plat est servi dans un récipient en terre cuite conique ?",ar:"ما الطبق الذي يُقدّم في إناء فخاري مخروطي؟",en:"Which dish is served in a conical clay pot?"}},
+{o:['Harira','Bissara','Rfissa','Mloui'],c:0,q:{fr:"Quelle soupe traditionnelle est servie pendant le ramadan au Maroc ?",ar:"ما الحساء التقليدي الذي يُقدّم في رمضان بالمغرب؟",en:"Which traditional soup is served during Ramadan in Morocco?"}},
+{o:['Pastilla','Briouat','Msemen','Baghrir'],c:0,q:{fr:"Quelle pâtisserie feuilletée est sucrée-salée, garnie de poulet ou de pigeon et d'amandes ?",ar:"ما الفطيرة المغربية المورّقة المحلاة والمالحة بالدجاج أو الحمام واللوز؟",en:"Which flaky pastry is sweet and savoury, with chicken or pigeon and almonds?"}},
+{o:['Msemen','Baghrir','Harcha','Chebakia'],c:1,q:{fr:"Quelle crêpe marocaine est couverte d'alvéoles (petits trous) ?",ar:"ما الرقاق المغربي المليء بالثقوب الصغيرة؟",en:"Which Moroccan crepe is full of little holes?"}},
+{o:['Msemen','Baghrir','Harcha','Chebakia'],c:0,q:{fr:"Quel pain feuilleté carré est servi au petit-déjeuner au Maroc ?",ar:"ما الخبز المربّع المورّق الذي يُقدّم على الفطور بالمغرب؟",en:"Which square flaky bread is served for breakfast in Morocco?"}},
+{o:['Chine','Japon','Corée','Thaïlande'],c:1,q:{fr:"De quel pays vient le sushi ?",ar:"من أي بلد أتى السوشي؟",en:"Which country does sushi come from?"}},
+{o:['Rome','Naples','Milan','Florence'],c:1,q:{fr:"La pizza Margherita est originaire de quelle ville ?",ar:"من أي مدينة أصل بيتزا مارغريتا؟",en:"Pizza Margherita originates from which city?"}},
+{o:['Italie','Mexique','Espagne','Portugal'],c:2,q:{fr:"La paella est un plat typique de quel pays ?",ar:"الباييلا طبق تقليدي من أي بلد؟",en:"Paella is a traditional dish from which country?"}},
+{o:['Mexique','Pérou','Brésil','Argentine'],c:0,q:{fr:"Les tacos sont originaires de quel pays ?",ar:"من أي بلد أصل التاكوس؟",en:"Tacos originate from which country?"}},
+{o:['Corée','Japon','Chine','Vietnam'],c:1,q:{fr:"Les ramen sont des nouilles dans un bouillon. De quel pays viennent-elles ?",ar:"الرامن نودلز في مرق، من أي بلد تأتي؟",en:"Ramen are noodles in broth. Which country are they from?"}}
+];
+function boxLabel(p){return p[0]==='score'?`+${p[1]} ${t('score')}`:p[0]==='coupon'?`${t('coupon')} ${p[1]} DH`:p[0]==='pts'?`+${p[1]} ${t('pts')}`:t('boxNone');}
+function boxV(){const ok=plays('box')>0;return `<h2>${t('box')}</h2><p class="m">${t('boxRule')}</p>
+ <div class="card center"><div id="bx" style="font-size:96px;transition:transform .15s;margin:8px 0">🎁</div>
+ <p id="bm" style="font-weight:700;min-height:26px">${S.bm||''}</p>
+ <button id="bb" style="width:100%" ${ok?'':'disabled'} onclick="OPENBOX()">${t('obox')}</button>
+ <p class="m center" style="margin-top:8px">${t('left')}: ${plays('box')}/1</p></div>`;}
+function OPENBOX(){
+ const me=cur();if(!me||plays('box')<=0||BXO)return;
+ BXO=true;usePlay('box');
+ const el=document.getElementById('bx');
+ if(el){el.style.transform='rotate(-14deg)';setTimeout(()=>{el.style.transform='rotate(14deg)'},150);setTimeout(()=>{el.style.transform='scale(1.25)'},300);}
+ const b=document.getElementById('bb');if(b)b.disabled=true;
+ const p=BOXP[Math.floor(Math.random()*BOXP.length)];
+ setTimeout(()=>{BXO=false;const u=cur();if(!u)return;
+  if(p[0]==='score'){u.score=(u.score||0)+p[1];u.best=Math.max(u.best||0,u.score);}
+  else if(p[0]==='coupon')u.vch=(u.vch||[]).concat(p[1]);
+  else if(p[0]==='pts')u.pts=Math.min(30,Math.round(((u.pts||0)+p[1])*10)/10);
+  S.bm='🎉 '+boxLabel(p);sv();R();},900);
+}
+function quizV(){
+ const me=cur();
+ if(S.qi===undefined)S.qi=Math.floor(Math.random()*QUIZ.length);
+ const Q=QUIZ[S.qi];const qt=Q.q[D.lang]||Q.q.en;
+ return `<h2>${t('quiz')}</h2><p class="m">${t('qRule')}</p>
+ <div class="card"><div class="row"><span class="tag">${t('qSerie')}: ${me.qs||0}/5</span><span class="m">+10</span></div>
+ <p style="font-size:17px;font-weight:700;margin:12px 0">${qt}</p>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${Q.o.map((o,k)=>`<button class="g" onclick="QANS(${k})">${o}</button>`).join('')}</div>
+ <p style="font-weight:700;margin-top:10px;min-height:22px">${S.qm||''}</p></div>`;
+}
+function QANS(k){
+ const me=cur(),Q=QUIZ[S.qi];
+ if(k===Q.c){me.qs=(me.qs||0)+1;me.score=(me.score||0)+10;me.best=Math.max(me.best||0,me.score);S.qm=t('qok')+' +10';
+  if(me.qs>=5){me.pts=Math.min(30,Math.round(((me.pts||0)+0.2)*10)/10);me.qs=0;S.qm+=' · '+t('qstreak');}}
+ else{me.qs=0;S.qm=t('qbad')+' '+Q.o[Q.c];}
+ S.qi=Math.floor(Math.random()*QUIZ.length);sv();R();
+}
+function gameBody(){switch(S.gm||'slots'){case 'kit':return kitchenV();case 'box':return boxV();case 'quiz':return quizV();default:return gameReel();}}
+function dailyCheck(){
+ const u=cur();if(!u)return;const n=Date.now();
+ if(u.ll&&n-u.ll<864e5)return;
+ u.ll=n;u.pts=Math.min(30,Math.round(((u.pts||0)+0.1)*10)/10);S.msg=t('dailyMsg');sv();
+}
+const FONTS={serif:"'Playfair Display',Georgia,serif",sans:"'Poppins',system-ui,sans-serif",deco:"'Pacifico',cursive"};
+function flowTable(r){
+ const LL=FLOW[D.lang]||FLOW.en,F=LL[r];const cs='padding:6px;border-bottom:1px solid var(--l)';
+ return `<h2 style="font-size:16px">${F.t}</h2><table style="width:100%;border-collapse:collapse;font-size:13px"><tr><th style="${cs};text-align:start">#</th><th style="${cs};text-align:start">${t('fstep')}</th><th style="${cs};text-align:start">${t('faction')}</th></tr>${F.steps.map((s,i)=>`<tr><td style="${cs}">${i+1}</td><td style="${cs}"><b>${s[0]}</b></td><td style="${cs}">${s[1]}</td></tr>`).join('')}</table><p class="m" style="margin-top:12px"><b>${LL.x}</b></p><table style="width:100%;border-collapse:collapse;font-size:13px">${F.extra.map(e=>`<tr><td style="${cs}">• ${e}</td></tr>`).join('')}</table>`;
+}
+function authV(){
+ const am=S.am||'login';
+ if(am==='forgot')return `<main><div class="center">${LOGO}<h2>${t('forgot')}</h2></div><div class="card"><input id="e" placeholder="${t('email')}"><button style="width:100%" onclick="A('reset')">${t('reset')}</button><p class="m">${S.msg}</p><button class="g s" onclick="S.am='login';S.msg='';R()">←</button></div></main>`;
+ const su=am==='signup',role=S.role||'cust';
+ const RC=[['sell','🍳','bSell','rd_sell'],['cust','🛒','bCust','rd_cust'],['driv','🛵','bDriv','rd_driv']];
+ return `<main>
+ <div class="center">${LOGO}<h2 style="margin:6px 0 0">Appetite</h2><p class="m">${t('tag')}</p>
+ <select style="width:auto" onchange="D.lang=this.value;sv();R()">${Object.keys(L).map(k=>`<option value="${k}" ${k===D.lang?'selected':''}>${LN[k]}</option>`).join('')}</select>
+ <button class="g s" onclick="A('theme')">◐</button></div>
+ <div style="display:flex;gap:8px;margin-top:12px"><button class="${su?'g':''}" style="flex:1" onclick="S.am='login';S.msg='';R()">${t('login')}</button><button class="${su?'':'g'}" style="flex:1" onclick="S.am='signup';S.msg='';R()">${t('signup')}</button></div>
+ <div class="card">
+ ${su?`<p class="m">${t('chooseRole')}</p>${RC.map(([k,e,lt,dt])=>`<div onclick="S.role='${k}';R()" style="cursor:pointer;display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r);border:2px solid ${role===k?'var(--o)':'var(--l)'};margin:8px 0"><span style="color:var(--o)">${IC(k==='sell'?'seller':k==='cust'?'cust':'driver',28)}</span><div><b>${t(lt)}</b><div class="m">${t(dt)}</div></div></div>`).join('')}<input id="n" placeholder="${t('name')}"><input id="ph" placeholder="${t('phone')}"><input id="ic" placeholder="${t('invCode')}">`:''}
+ <input id="e" type="email" placeholder="${t('email')}"><input id="p" type="password" placeholder="${t('pass')}">
+ <button style="width:100%;margin-top:8px" onclick="A('auth')">${su?t('createAcc'):t('sign')}</button>
+ ${su?'':`<p class="m" style="cursor:pointer;margin-top:8px" onclick="S.am='forgot';S.msg='';R()">${t('forgot')}</p><p class="m">${t('simNote')}</p>`}
+ </div>
+ ${su?'':`<div class="card"><b>${t('demo')}</b><div class="row" style="gap:6px;justify-content:flex-start;margin-top:8px">${RC.map(([k,e])=>`<button class="g s" onclick="A('demo','${k}')">${IC(k==='sell'?'seller':k==='cust'?'cust':'driver')} ${t('ur_'+k)}</button>`).join('')}</div></div>`}
+ <div class="card"><button class="g" style="width:100%" onclick="A('social','gmail')">${t('google')}</button><button class="g" style="width:100%;margin-top:8px" onclick="A('social','apple')">${t('apple')}</button><p class="m">${S.msg}</p></div>
+ </main>`;
+}
+function cartV(){
+ const c=D.cart,ks=Object.keys(c.items);
+ if(!ks.length)return `<p class="m">${t('cartEmpty')}</p>`;
+ const r=D.rs.find(x=>x.id===c.rid),me=cur();let tot=0;
+ const lines=ks.map(k=>{const it=c.items[k];tot+=it.p*it.q;return `<div class="row"><span>${it.n} ×${it.q}</span><span>${it.p*it.q} MAD <button class="g s" onclick="A('rm','${k}')">−</button></span></div>`}).join('');
+ return `<div class="card"><h2>${t('cart')} — ${r.n}</h2>${lines}<p><b>${t('total')}: ${tot} MAD</b></p>
+ <label class="m">${t('cname')}</label><input id="cn" value="${S.cname||me.name||''}">
+ <label class="m">${t('cph')}</label><input id="cph" value="${S.cph||me.phone||''}">
+ <label class="m">${t('addr')}</label><input id="ad" value="${S.addr||''}" placeholder="${t('addrPh')}">
+ <p class="m">${t('pickLoc')}${S.loc?' ✓':''}</p>
+ ${custMap(S.loc||null,[{x:r.x,y:r.y,n:r.n}],true)}
+ <div class="card" style="margin-top:10px"><b>${t('pay_m')}</b>
+ <div style="display:flex;gap:8px;margin-top:8px"><button class="${S.pay==='card'?'':'g'}" style="flex:1" onclick="PAYSET('card')">💳 ${t('pay_card')}</button><button class="${S.pay==='card'?'g':''}" style="flex:1" onclick="PAYSET('cash')">💵 ${t('pay_cash')}</button></div>
+ ${S.pay==='card'?`<input id="cc_n" placeholder="${t('cc_name')}" value="${S.card.n||''}"><input id="cc_num" inputmode="numeric" autocomplete="cc-number" placeholder="${t('cc_num')}" value="${S.card.num||''}"><div class="row" style="gap:8px"><input id="cc_exp" autocomplete="cc-exp" placeholder="${t('cc_exp')}" value="${S.card.exp||''}" style="flex:1"><input id="cc_cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="${t('cc_cvc')}" value="${S.card.cvc||''}" style="flex:1"></div><p class="m">${t('brand')}: ${cardBrand((S.card.num||'').replace(/\s/g,''))||'—'}</p>`:`<p class="m">${t('payCashNote')}</p>`}
+ <p class="m">${t('payNote')}</p></div>
+ <button style="width:100%;margin-top:10px" onclick="A('order')">${t('order')}</button></div>`;
+}
+function LOCSET(e,el){
+ const b=el.getBoundingClientRect();
+ capCard();
+ S.loc={x:+(((e.clientX-b.left)/b.width)*100).toFixed(1),y:+(((e.clientY-b.top)/b.height)*100).toFixed(1)};
+ if(document.getElementById('ad'))S.addr=v('ad');
+ if(document.getElementById('cph'))S.cph=v('cph');
+ if(document.getElementById('cn'))S.cname=v('cn');
+ R();
+}
+function custMap(loc,others,clickable){
+ const pins=(others||[]).map(p=>`<g><circle cx="${p.x}" cy="${p.y}" r="3.6" fill="#FF5A1F" stroke="#fff" stroke-width="1"/><text x="${p.x}" y="${p.y-5}" font-size="3.2" font-weight="700" text-anchor="middle" fill="#222" stroke="#fff" stroke-width=".7" paint-order="stroke">${p.n}</text></g>`).join('');
+ const cl=loc?`<circle cx="${loc.x}" cy="${loc.y}" r="5" fill="#2563EB" stroke="#fff" stroke-width="1.5"/><text x="${loc.x}" y="${loc.y-7}" font-size="3.4" font-weight="700" text-anchor="middle" fill="#1e3a8a" stroke="#fff" stroke-width=".8" paint-order="stroke">${t('client')}</text>`:'';
+ return `<svg class="map" viewBox="0 0 100 100" ${clickable?'style="cursor:crosshair" onclick="LOCSET(event,this)"':''}><rect width="100" height="100" fill="#E9EEE3"/><path d="M0 60Q40 40 100 58" stroke="#F4D35E" stroke-width="2" fill="none"/><g stroke="#fff" stroke-width="3.5" fill="none"><path d="M0 50H100M50 0V100M0 22L100 30M18 0L30 100M0 80L100 72M80 0L72 100"/></g>${pins}${cl}</svg>`;
+}
+function custBox(o){
+ const u=D.users.find(x=>x.id===o.uid)||{},r=D.rs.find(x=>x.id===o.rid),ph=(o.cph||u.phone||'');
+ return `<div class="card"><b>${t('custInfo')}</b>
+ <div style="margin-top:6px">👤 ${o.cname||u.name||'—'}${ph?' · 📞 '+ph:''}</div>
+ <div class="m">📍 ${o.addr||'—'}${u.city?' · '+u.city:''}</div>
+ <div class="m">🧾 ${o.items.map(i=>i.n+' ×'+i.q).join(', ')} — ${o.total} MAD</div>
+ ${payLine(o)}${custMap(o.loc||null,r?[{x:r.x,y:r.y,n:r.n}]:[],false)}
+ <div class="row" style="margin-top:8px;justify-content:flex-start;gap:8px"><a class="tag" href="tel:${ph.replace(/\s/g,'')}">📞 ${t('call')}</a><a class="tag" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((o.addr||'')+' Fès')}">🗺️ ${t('gmaps')}</a></div></div>`;
+}
+function orderLine(o){return `<div class="card"><b>${o.cname||t('client')}</b>${o.cph?' · '+o.cph:''}<div class="m">📍 ${o.addr||'—'}</div><div class="m">${o.items.map(i=>i.n+' ×'+i.q).join(', ')} — ${o.total} MAD</div></div>`;}
+function drvCard(id){const u=D.users.find(x=>x.id===id);if(!u)return '';return `<div class="m" style="margin-top:6px">🛵 ${t('drvBy')}: <b>${u.name}</b>${u.bio?' — '+u.bio:''}</div>`;}
+function capCard(){if(!document.getElementById('cc_n'))return;S.card={n:v('cc_n'),num:v('cc_num'),exp:v('cc_exp'),cvc:v('cc_cvc')};}
+function PAYSET(m){capCard();S.pay=m;R();}
+function cardBrand(n){return /^4/.test(n)?'Visa':/^(5[1-5]|2[2-7])/.test(n)?'Mastercard':'';}
+function luhn(n){let s=0,d=false;for(let i=n.length-1;i>=0;i--){let x=+n[i];if(d){x*=2;if(x>9)x-=9;}s+=x;d=!d;}return s%10===0;}
+function cardOK(){const c=S.card||{},n=(c.num||'').replace(/\s/g,''),e=(c.exp||'').replace(/\s/g,'');return /^\d{12,19}$/.test(n)&&luhn(n)&&!!cardBrand(n)&&/^(0[1-9]|1[0-2])\/?\d{2}$/.test(e)&&/^\d{3,4}$/.test(c.cvc||'');}
+function payObj(){if(S.pay!=='card')return {m:'cash',st:'due'};const n=(S.card.num||'').replace(/\s/g,'');return {m:'card',b:cardBrand(n),l4:n.slice(-4),st:'paid',ref:'TX'+Date.now().toString(36).toUpperCase()};}
+function payLine(o){if(!o.pay)return '';return o.pay.m==='card'?`<div class="m">💳 ${o.pay.b} •••• ${o.pay.l4} · ${t('paid')}</div>`:`<div class="m">💵 ${o.pay.st==='collected'?t('collected'):t('toCollect')+': '+o.total+' MAD'}</div>`;}
+function rcptHTML(o){
+ const r=D.rs.find(x=>x.id===o.rid)||{n:'—'},p=o.pay;
+ const pay=!p?'—':p.m==='card'?`${p.b} •••• ${p.l4} — ${t('rcPaid')}`:(p.st==='collected'?t('rcCollected'):t('rcCash'));
+ return `<div class="card" style="background:#fff;color:#111;border:1px solid #ccc"><h2 style="color:#111">${t('rcTitle')} #${o.id}</h2>
+ <p style="color:#555;font-size:13px">${r.n} · ${t('rcDate')}: ${new Date(o.at||Date.now()).toLocaleString()}${p&&p.ref?' · '+p.ref:''}</p>
+ <p style="color:#111">${t('rcCust')}: ${o.cname||''} · ${o.cph||''}<br>${t('rcAddr')}: ${o.addr||'—'}</p>
+ <table style="width:100%;font-size:14px;color:#111;border-collapse:collapse">${o.items.map(i=>`<tr><td style="padding:4px 0">${i.n} ×${i.q}</td><td style="text-align:end">${i.p*i.q} MAD</td></tr>`).join('')}</table>
+ <p style="color:#111"><b>${t('rcTotal')}: ${o.total} MAD</b><br>${t('eMode')}: ${pay}</p>
+ <p style="color:#555;font-size:13px">${t('rcThanks')}</p></div>`;
+}
+function RCPT(id){S.rv=S.rv===id?null:id;R();}
+function DLRC(id){
+ const o=D.os.find(x=>x.id==id);if(!o)return;
+ const html='<!doctype html><html><head><meta charset="utf-8"><title>Recu #'+o.id+'</title></head><body style="font-family:sans-serif;max-width:480px;margin:auto">'+rcptHTML(o)+'</body></html>';
+ try{const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));const a=document.createElement('a');a.href=url;a.download='recu-appetite-'+o.id+'.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}catch(e){}
+ S.rv=o.id;S.msg=t('dlNote');R();
+}
+function TOAST(m){
+ const err=['err','bad','exists','needAddr','payInvalid','pick','noAcc'].some(k=>t(k)===m);
+ document.querySelectorAll('.toast').forEach(x=>x.remove());
+ const d=document.createElement('div');
+ d.className='toast';d.setAttribute('role','status');d.textContent=m;
+ d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:92px;max-width:92%;padding:12px 18px;border-radius:14px;color:#fff;font-weight:600;text-align:center;z-index:99;box-shadow:0 8px 24px #0005;transition:opacity .3s;opacity:0;background:'+(err?'#D93025':'#1E8E3E');
+ document.body.appendChild(d);
+ requestAnimationFrame(()=>{d.style.opacity='1';});
+ if(navigator.vibrate)navigator.vibrate(err?[80,60,80]:40);
+ setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),300);},2600);
+}
+const ICONS={
+back:`<path d="M15 18l-6-6 6-6"/>`,
+save:`<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h8V3M8 21v-7h8v7"/>`,
+logout:`<path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/>`,
+trash:`<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>`,
+invite:`<path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7"/><path d="M12 7a3 3 0 1 1 0-6c3 0 4 6 0 6zM12 7a3 3 0 1 0 0-6c-3 0-4 6 0 6z"/>`,
+copy:`<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>`,
+seller:`<path d="M3 9l2-5h14l2 5"/><path d="M3 9v11h18V9M3 9h18M9 20v-6h6v6"/>`,
+cust:`<path d="M6 7h12l1 13H5z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/>`,
+driver:`<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-7h6l2 7M10 10l2-3h3"/>`,
+cart:`<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h10L20 7H6"/>`,
+add:`<path d="M12 5v14M5 12h14"/>`,
+check:`<path d="M20 6L9 17l-5-5"/>`,
+x:`<path d="M18 6L6 18M6 6l12 12"/>`,
+flag:`<path d="M4 21V4h11l-2 4 2 4H4"/>`,
+box:`<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>`,
+home:`<path d="M3 11l9-7 9 7v9H3z"/>`,
+game:`<rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h4M9 10v4"/>`,
+orders:`<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6"/>`,
+loyal:`<circle cx="12" cy="9" r="6"/><path d="M8.5 14.5L7 22l5-3 5 3-1.5-7.5"/>`,
+profile:`<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>`,
+menu:`<path d="M4 6h16M4 12h16M4 18h10"/>`,
+status:`<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>`,
+map:`<path d="M9 3L3 5v16l6-2 6 2 6-2V3l-6 2z"/><path d="M9 3v16M15 5v16"/>`,
+target:`<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>`,
+money:`<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>`,
+pin:`<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>`,
+phone:`<path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>`,
+card:`<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>`,
+cash:`<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>`,
+shield:`<path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/>`
+};
+const NAVIC={home:'home',game:'game',orders:'orders',loyal:'loyal',profile:'profile',menu:'menu',status:'status',map:'map',missions:'target',active:'driver',earn:'money'};
+const IC=(n,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;flex:none">${ICONS[n]||''}</svg>`;
+function REFER(code,nu){
+ const id=+String(code||'').replace(/\D/g,'');if(!id)return;
+ const ref=D.users.find(u=>u.id===id);if(!ref||ref.id===nu.id)return;
+ ref.refs=ref.refs||0;if(ref.refs>=5)return;
+ ref.refs++;ref.vch=(ref.vch||[]).concat(1);S.pend=t('refDone');
+}
+function fallbackCopy(txt){const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();}
+function COPYINV(){
+ const me=cur();const txt='Appetite — '+t('inviteT')+' : AP'+me.id;
+ const done=()=>{S.msg=t('copied');R();};
+ try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,()=>{fallbackCopy(txt);done();});return;}}catch(e){}
+ fallbackCopy(txt);done();
+}
+const PLAY_MAX=2;
+function plays(g){const me=cur();const d=new Date().toDateString();if(!me.pl||me.pl.d!==d)me.pl={d,slots:0,kit:0,box:0};return (g==='box'?1:PLAY_MAX)-(me.pl[g]||0);}
+function usePlay(g){plays(g);cur().pl[g]=(cur().pl[g]||0)+1;sv();}
+function PV(){const c=calc();const e=document.getElementById('pv');if(e)e.textContent=`⭐ ${c.pts} ${t('gained')} · +${c.bonus} ${t('bonus')} · ${c.price} MAD`;}
+function clearTP(){TOP.forEach((_,i)=>{const e=document.getElementById('tp'+i);if(e)e.checked=false})}
+function gameV(){
+ const opts=D.rs.filter(r=>r.st==='ok').flatMap(r=>r.d.map(d=>`<option value="${r.id}|${d.id}|${d.p}|${d.n}">${r.n} — ${d.n} (${d.p} MAD)</option>`)).join('');
+ const me=cur(),sc=me.score||0,best=me.best||0;
+ return `<h2>${t('game')}</h2><p class="m">${t('gameDesc')}</p>
+ <div class="card"><div class="row"><div><div class="m">${t('score')}</div><b style="font-size:26px;color:var(--o)">${sc}</b></div>
+ <div style="text-align:end"><div class="m">${t('best')}</div><b>${best}</b></div></div>
+ <div class="bar" style="margin-top:10px"><i style="width:${Math.min(100,sc/10)}%"></i></div>
+ ${sc>=1000?`<button style="width:100%;margin-top:10px" onclick="A('claim')">${t('claim')}</button>`:`<p class="m">${t('toClaim')}</p>`}</div>
+ <div class="card"><label class="m">${t('pick')}</label><select id="gd" onchange="PV()">${opts}</select>
+ <label class="m" style="display:block;margin-top:8px">${t('extras')}</label>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${TOP.map((x,i)=>`<label class="row" style="justify-content:flex-start;gap:6px;padding:6px;border:1px solid var(--l);border-radius:10px;cursor:pointer"><input type="checkbox" id="tp${i}" style="width:auto;margin:0" onchange="PV()"><span>${x[0]}</span><span class="m">+${x[1]}</span></label>`).join('')}</div>
+ <p class="m" id="pv" style="margin-top:8px">${t('bonus')}: 3+ = +50 · 5+ = +150</p>
+ <div class="row" style="margin-top:8px"><button onclick="A('play')">${t('play')}</button><button class="g" onclick="A('addgame')">${t('addCart')}</button></div></div>`;
+}
+function cartOld(){
+ const c=D.cart,ks=Object.keys(c.items);
+ if(!ks.length)return `<p class="m">${t('cartEmpty')}</p>`;
+ const r=D.rs.find(x=>x.id===c.rid);let tot=0;
+ const lines=ks.map(k=>{const it=c.items[k];tot+=it.p*it.q;return `<div class="row"><span>${it.n} ×${it.q}</span><span>${it.p*it.q} MAD <button class="g s" onclick="A('rm','${k}')">−</button></span></div>`}).join('');
+ return `<div class="card"><h2>${t('cart')} — ${r.n}</h2>${lines}<p><b>${t('total')}: ${tot} MAD</b></p>
+ <button style="width:100%" onclick="A('order')">${t('order')}</button></div>`;
+}
+function ordersC(){
+ const os=D.os.filter(o=>o.uid===cur().id).reverse();
+ if(!os.length)return `<h2>${t('orders')}</h2><p class="m">${t('empty')}</p>`;
+ return `<h2>${t('orders')}</h2>`+os.map(o=>{const r=D.rs.find(x=>x.id===o.rid);return `<div class="card"><div class="row"><b>${r.n}</b><span class="tag">${t('s_'+o.st)}</span></div>
+ <div class="m">${o.items.map(i=>i.n+' ×'+i.q).join(', ')} — ${o.total} MAD</div>${o.drv?drvCard(o.drv):''}${track(o.st)}<div class="row" style="margin-top:8px;justify-content:flex-start;gap:8px"><button class="s" onclick="RCPT(${o.id})">${t('viewRc')}</button><button class="s g" onclick="DLRC(${o.id})">${t('dlRc')}</button></div>${S.rv===o.id?rcptHTML(o):''}</div>`}).join('');
+}
+function loyalV(){
+ const me=cur(),p=Math.round((me.pts||0)*10)/10,sc=Math.min(1,p/30),vch=me.vch||[];
+ return `<h2>${t('loyal')}</h2>
+ <div class="card center"><div style="height:210px;display:flex;align-items:flex-end;justify-content:center"><svg viewBox="0 0 120 160" width="160" height="210" style="transform-origin:50% 100%;transform:scale(${0.3+0.7*sc});transition:transform .9s ease"><rect x="54" y="92" width="12" height="60" rx="4" fill="#8B5A2B"/><circle cx="60" cy="60" r="38" fill="#2E8B3E"/><circle cx="38" cy="80" r="26" fill="#3BA55A"/><circle cx="82" cy="78" r="26" fill="#3BA55A"/>${sc>=1?'<circle cx="60" cy="26" r="6" fill="#FF5A1F"/><circle cx="44" cy="58" r="5" fill="#FF5A1F"/><circle cx="78" cy="56" r="5" fill="#FF5A1F"/>':''}</svg></div>
+ <b style="font-size:22px">${p} / 30 ${t('pts')}</b>
+ <div class="bar" style="margin-top:8px"><i style="width:${sc*100}%"></i></div></div>
+ <div class="card"><b>${t('redeem')}</b><p class="m">${t('redeemRule')}</p>
+ <button style="width:100%" ${p<30?'disabled':''} onclick="A('plat')">${t('rplat')}</button>
+ <button id="spinW" class="g" style="width:100%;margin-top:8px" ${p<30?'disabled':''} onclick="RSPIN()">🎡 ${t('spinWheel')}</button></div>
+ ${wheelV()}
+ <div class="card"><b>${t('vouchers')}</b>${vch.length?vch.map(x=>`<div class="row"><span>${x} DH</span></div>`).join(''):`<p class="m">${t('none')}</p>`}</div>`;
+}
+
+/* ---------- SELLER (vendeur) ---------- */
+function sellV(){
+ const r=myRest();
+ if(!r)return '';
+ if(r.st==='pend')return `<h2>${r.n}</h2><div class="card"><p class="warn">${t('pend')}</p><button onclick="A('validate')">${t('validate')}</button></div>`;
+ if(S.tab==='orders'){
+  const os=D.os.filter(o=>o.rid===r.id&&(o.st==='nw'||o.st==='pr')).reverse();
+  return `<h2>${t('orders')}</h2>${os.length?'':`<p class="m">${t('empty')}</p>`}`+os.map(o=>`<div class="card"><div class="row"><b>#${o.id}</b><span class="tag">${t('s_'+o.st)}</span></div>
+  <div class="m">${o.items.map(i=>i.n+' ×'+i.q).join(', ')} — ${o.total} MAD</div>
+  ${custBox(o)}${o.st==='nw'?`<button class="s" style="margin-top:8px" onclick="A('ready',${o.id})">${t('markReady')}</button>`:`<span class="m">${t('waitDriver')}</span>`}</div>`).join('');
+ }
+ if(S.tab==='map'){const os=D.os.filter(o=>o.rid===r.id&&(o.st==='nw'||o.st==='pr'));return `<h2>${t('mapCust')}</h2>${custMap(null,[{x:r.x,y:r.y,n:r.n}].concat(os.filter(o=>o.loc).map(o=>({x:o.loc.x,y:o.loc.y,n:o.cname||t('client')}))),false)}${os.map(orderLine).join('')}`;}
+ if(S.tab==='menu')return `<h2>${t('menu')}</h2>${r.d.map(d=>`<div class="card row" style="justify-content:flex-start;gap:12px">${dishImg(d,r)}<span style="flex:1">${d.n} — ${d.p} MAD</span><button class="g s" onclick="A('deld',${d.id})">✕</button></div>`).join('')}
+ <div class="card"><input id="dn" placeholder="${t('dish')}"><input id="dp" type="number" placeholder="${t('priceU')}"><label class="m">${t('dishPhoto')}</label><input id="dimg" type="file" accept="image/*"><button style="width:100%" onclick="A('adddish')">${t('saveBtn')}</button></div>`;
+ return `<h2>${t('status')}</h2><div class="card"><div class="row"><span>${r.open?t('open'):t('closed')}</span><button class="s" onclick="A('toggle')">${t('toggleOpen')}</button></div>
+ <input id="wt" type="number" placeholder="${t('wait')}" value="${r.w}"><button style="width:100%" onclick="A('wait')">${t('saveBtn')}</button></div>`;
+}
+
+/* ---------- DRIVER (livreur) ---------- */
+function drivV(){
+ const me=cur();
+ if(S.tab==='missions'){
+  const ms=D.os.filter(o=>!o.drv&&(o.st==='nw'||o.st==='pr')&&!me.ref.includes(o.id));
+  return `<h2>${t('missions')}</h2>${ms.length?'':`<p class="m">${t('noMission')}</p>`}`+ms.map(o=>{const r=D.rs.find(x=>x.id===o.rid);return `<div class="card"><b>${r.n}</b>
+  <div class="m">${t('gain')}: ${o.gain} MAD · ${t('eta')}: ${o.eta} ${t('min')}</div>
+  ${custBox(o)}<div class="row" style="margin-top:8px"><button class="s" onclick="A('accept',${o.id})">${t('accept')}</button><button class="g s" onclick="A('refuse',${o.id})">${t('refuse')}</button></div></div>`}).join('');
+ }
+ if(S.tab==='map'){const os=D.os.filter(o=>o.st!=='lv'&&(o.drv===me.id||!o.drv));const pins=[];os.forEach(o=>{const r=D.rs.find(x=>x.id===o.rid);if(r)pins.push({x:r.x,y:r.y,n:r.n});if(o.loc)pins.push({x:o.loc.x,y:o.loc.y,n:o.cname||t('client')});});return `<h2>${t('mapCust')}</h2>${custMap(null,pins,false)}${os.length?'':`<p class="m">${t('noMission')}</p>`}${os.map(orderLine).join('')}`;}
+ if(S.tab==='active'){
+  const os=D.os.filter(o=>o.drv===me.id&&o.st!=='lv');
+  return `<h2>${t('active')}</h2>${os.length?'':`<p class="m">${t('noMission')}</p>`}`+os.map(o=>{
+   const r=D.rs.find(x=>x.id===o.rid);
+   const act=o.st==='nw'?`<span class="m">${t('waitPrep')}</span>`:o.st==='pr'?`<button class="s" onclick="A('pick',${o.id})">${t('pickup')}</button>`:`<button class="s" onclick="A('deliver',${o.id})">${t('deliver')}</button>`;
+   return `<div class="card"><b>${r.n}</b> <span class="tag">${t('s_'+o.st)}</span><div class="m">#${o.id} · ${o.total} MAD</div>${custBox(o)}<div style="margin-top:8px">${act}</div></div>`;
+  }).join('');
+ }
+ return `<h2>${t('earn')}</h2><div class="card"><b>${me.earn} MAD</b><p class="m">★ 4.8 · ${t('rate')}</p></div>`;
+}
+
+/* ---------- PROFILE (tous rôles) ---------- */
+function profV(){
+ const me=cur(),th=D.th||{acc:'#FF5A1F',fs:15,rad:14};
+ const av=me.photo?`<img src="${me.photo}" style="width:96px;height:96px;border-radius:50%;object-fit:cover">`:`<div style="width:96px;height:96px;border-radius:50%;background:var(--o);color:#fff;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700">${(me.name||'?')[0].toUpperCase()}</div>`;
+ return `<h2>${t('profile')}</h2>
+ <div class="card center"><div style="display:flex;justify-content:center">${av}</div><h2 style="margin:10px 0 4px">${me.name||''}</h2><span class="tag">${IC(me.role==='sell'?'seller':me.role==='cust'?'cust':'driver',16)} ${t('ur_'+me.role)}</span><div style="margin-top:10px"><label class="tag" style="cursor:pointer">${t('upload')}<input type="file" accept="image/*" onchange="PHOTOUP(this)" style="display:none"></label></div></div>
+ <div class="card">
+ <label class="m">${t('utype')}</label><select disabled style="opacity:.8"><option>${t('ur_'+me.role)}</option></select>
+ <label class="m">${t('fullname')}</label><input id="pn" value="${me.name||''}">
+ <label class="m">${t('email')}</label><input id="pe" value="${me.email||''}">
+ <label class="m">${t('phone')}</label><input id="pp" value="${me.phone||''}">
+ <label class="m">${t('city')}</label><input id="pc" value="${me.city||''}">
+ <label class="m">${t(me.role==='cust'?'bio':'desc')}</label><textarea id="pb" rows="3" style="width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--l);background:var(--c);color:var(--t)">${me.bio||''}</textarea>
+ </div>
+ <div class="card">
+ <div class="row"><span>${t('accent')}</span><input type="color" id="pa" value="${th.acc}" style="width:60px;height:36px;padding:2px;margin:0"></div>
+ <label class="m">${t('fsize')}</label><select id="pf"><option value="14" ${th.fs==14?'selected':''}>${t('s1')}</option><option value="15" ${th.fs==15?'selected':''}>${t('s2')}</option><option value="17" ${th.fs==17?'selected':''}>${t('s3')}</option></select>
+ <label class="m">${t('radius')}</label><select id="pr"><option value="0" ${th.rad==0?'selected':''}>${t('r1')}</option><option value="14" ${th.rad==14?'selected':''}>${t('r2')}</option><option value="28" ${th.rad==28?'selected':''}>${t('r3')}</option></select>
+ <label class="m">${t('ftT')}</label><select id="pft">${['serif','sans','deco'].map(k=>`<option value="${k}" ${(th.ft||'serif')===k?'selected':''}>${k==='deco'?t('fDeco'):k==='serif'?t('fSerif'):t('fSans')}</option>`).join('')}</select>
+ <label class="m">${t('ftB')}</label><select id="pfb">${['serif','sans','deco'].map(k=>`<option value="${k}" ${(th.fb||'sans')===k?'selected':''}>${k==='deco'?t('fDeco'):k==='serif'?t('fSerif'):t('fSans')}</option>`).join('')}</select>
+ <button style="width:100%;margin-top:8px" onclick="A('saveP')">${IC('save')} ${t('save')}</button>
+ <button class="g" style="width:100%;margin-top:8px" onclick="A('rth')">${t('resetTheme')}</button>
+ </div>
+ <div class="card row"><span>${t('theme')}</span><button class="g s" onclick="A('theme')">◐</button></div>
+ ${flowAll(me.role)}
+ <div class="card"><b>${IC('invite')} ${t('inviteT')}</b><p class="m">${t('inviteD')}</p>
+ <div class="row"><b>AP${me.id}</b><span class="m">${me.refs||0}/5 ${t('inviteCount')}</span></div>
+ <button style="width:100%;margin-top:8px" onclick="A('copyinv')">${IC('copy')} ${t('copyInv')}</button></div>
+ <div class="card"><b style="color:#D93025">${IC('shield')} ${t('delAcc')}</b>
+ ${S.delAsk?`<p class="warn">${t('delWarn')}</p><button style="width:100%;background:#D93025" onclick="A('delok')">${IC('trash')} ${t('delConfirm')}</button><button class="g" style="width:100%;margin-top:6px" onclick="S.delAsk=false;R()">${IC('back')} ${t('cancel')}</button>`:`<button class="g" style="width:100%;margin-top:8px;color:#D93025;border-color:#D93025" onclick="A('delask')">${IC('trash')} ${t('delAcc')}</button>`}</div>
+ <button class="g" style="width:100%" onclick="A('logout')">${IC('logout')} ${t('logout')}</button>`;
+}
+
+/* ---------- ACTIONS ---------- */
+function A(a,x,y){
+ S.msg='';S.shown='';
+ const me=cur();
+ if(a==='auth'){
+  const e=v('e').trim().toLowerCase(),p=v('p');
+  if(S.am==='signup'){
+   if(!e||!p||!v('n'))return (S.msg=t('err'),R());
+   if(D.users.some(u=>u.email===e))return (S.msg=t('exists'),R());
+   S.pend=t('welcome');const nu=mk(v('n'),e,p,v('ph'),S.role||'cust');REFER(v('ic'),nu);return logIn(nu);
+  }
+  const u=D.users.find(u=>u.email===e&&u.pass===p);
+  return u?(S.pend=t('loginOk'),logIn(u)):(S.msg=t('bad'),R());
+ }
+ if(a==='social'){
+  const ro=document.getElementById('ro')?v('ro'):'cust';
+  const e='demo.'+x+'@mail.com';
+  return logIn(D.users.find(u=>u.email===e)||mk('Demo '+x,e,'','',ro));
+ }
+ if(a==='demo'){const e='demo.'+x+'@mail.com';let u=D.users.find(z=>z.email===e);if(!u){u=mk('Demo '+x,e,'123456','',x);if(x==='sell'){const rr=D.rs.find(z=>z.owner===u.id);if(rr){rr.st='ok';rr.open=true;rr.n='Restaurant démo';}}}S.pend=t('loginOk');return logIn(u);}
+ if(a==='reset'){
+  const e=v('e').trim().toLowerCase();
+  S.msg=D.users.some(u=>u.email===e)?t('resetSent'):t('noAcc');
+ }
+ if(a==='copyinv'){COPYINV();return;}
+ if(a==='delask'){S.delAsk=true;}
+ if(a==='delok'&&me){D.rs=D.rs.filter(r=>r.owner!==me.id);D.users=D.users.filter(u=>u.id!==me.id);D.os=D.os.filter(o=>o.uid!==me.id);D.u=null;S.delAsk=false;S.am='login';S.msg=t('accDeleted');}
+ if(a==='rth'){D.th={acc:'#FF5A1F',fs:15,rad:14,ft:'serif',fb:'sans'};D.theme='light';S.msg=t('saved');}
+ if(a==='theme')D.theme=D.theme==='dark'?'light':'dark';
+ if(a==='logout'){D.u=null;S.am='login';S.msg='';}
+ if(a==='add'){
+  const r=D.rs.find(z=>z.id==x),d=r.d.find(z=>z.id==y);
+  if(D.cart.rid!==r.id)D.cart={rid:r.id,items:{}};
+  const k='d'+d.id;const it=D.cart.items[k]||{n:d.n,p:d.p,q:0};it.q++;D.cart.items[k]=it;
+  S.msg=t('added');
+ }
+ if(a==='play'){
+  const c=calc();
+  if(!c.b[0]){S.msg=t('pick');}
+  else{me.score=(me.score||0)+c.pts;me.best=Math.max(me.best||0,me.score);S.msg=`+${c.pts} ${t('gained')}`;clearTP();}
+ }
+ if(a==='addgame'){
+  const c=calc();
+  if(!c.b[0]){S.msg=t('pick');}
+  else{
+   const rid=+c.b[0];if(D.cart.rid!==rid)D.cart={rid,items:{}};
+   const name=c.b[3]+(c.sel.length?' + '+c.sel.map(x=>x[0]).join(', '):'');
+   D.cart.items['g'+(++D.seq)]={n:name,p:(+c.b[2])+c.price,q:1};
+   S.msg=t('added');clearTP();
+  }
+ }
+ if(a==='mkplate'){
+  const b=v('gd').split('|');
+  if(!b[0]){S.msg=t('pick');}
+  else{
+   const rid=+b[0];if(D.cart.rid!==rid)D.cart={rid,items:{}};
+   const ings=S.ings||[];
+   const name=b[3]+(ings.length?' + '+ings.map(k=>t('c_'+k)).join(', '):'');
+   D.cart.items['g'+(++D.seq)]={n:name,p:(+b[2])+ings.length*2,q:1};
+   S.ings=[];S.msg=t('added');
+  }
+ }
+ if(a==='clearIng'){S.ings=[];}
+ if(a==='claim'&&(me.score||0)>=1000){me.score-=1000;me.pts=Math.min(30,Math.round((me.pts+0.1)*10)/10);S.msg=t('claimed');}
+ if(a==='rm'){
+  const it=D.cart.items[x];if(it){it.q--;if(it.q<=0)delete D.cart.items[x];}
+  if(!Object.keys(D.cart.items).length)D.cart={rid:null,items:{}};
+ }
+ if(a==='order'){
+  const c=D.cart,items=Object.values(c.items);
+  if(!items.length)return R();
+  capCard();
+  if(S.pay==='card'&&!cardOK()){S.msg=t('payInvalid');return R();}
+  if(document.getElementById('ad'))S.addr=v('ad');
+  if(document.getElementById('cph'))S.cph=v('cph');
+  if(document.getElementById('cn'))S.cname=v('cn');
+  if(!S.addr||!S.loc){S.msg=t('needAddr');return R();}
+  let total=items.reduce((s,i)=>s+i.p*i.q,0);
+  const vc=(me.vch||[]).filter(x=>x<=total).sort((a,b)=>b-a)[0];
+  if(vc){total-=vc;me.vch.splice(me.vch.indexOf(vc),1);}
+  D.rs.find(r=>r.id===c.rid).o++;
+  D.os.push({id:++D.seq,rid:c.rid,uid:me.id,items,total,st:'nw',drv:null,gain:15,eta:10,ref:[],loc:S.loc,addr:S.addr,cph:S.cph||me.phone||'',cname:S.cname||me.name,at:Date.now(),pay:payObj()});
+  D.cart={rid:null,items:{}};S.tab='orders';S.sel=null;S.msg=t('ordered');S.loc=null;S.addr='';S.card={};
+ }
+ if(a==='plat'&&(me.pts||0)>=30){me.pts=0;me.vch=(me.vch||[]).concat(25);S.msg=t('rplat')+' ✓';}
+ if(a==='validate'){myRest().st='ok';S.msg=t('validOk');}
+ if(a==='ready'){D.os.find(o=>o.id==x).st='pr';S.msg=t('readyOk');}
+ if(a==='adddish'){const n=v('dn').trim(),p=+v('dp');if(n&&p)ADDDISH(n,p);}
+ if(a==='deld'){const r=myRest();r.d=r.d.filter(d=>d.id!=x);S.msg=t('dishDel');}
+ if(a==='toggle'){const r=myRest();r.open=!r.open;S.msg=t('tglOk');}
+ if(a==='wait'){const r=myRest();r.w=+v('wt')||r.w;S.msg=t('waitOk');}
+ if(a==='accept'){D.os.find(o=>o.id==x).drv=me.id;S.msg=t('accOk');}
+ if(a==='refuse'){me.ref.push(+x);S.msg=t('refOk');}
+ if(a==='pick'){D.os.find(o=>o.id==x).st='rc';S.msg=t('pickOk');}
+ if(a==='deliver'){
+  const o=D.os.find(o=>o.id==x);o.st='lv';
+  me.earn+=o.gain;if(o.pay&&o.pay.m==='cash')o.pay.st='collected';S.msg=t('delOk');
+  {const cu=D.users.find(u=>u.id===o.uid);cu.pts=Math.min(30,(cu.pts||0)+1);}
+ }
+ if(a==='saveP'){
+  const e=v('pe').trim().toLowerCase();
+  if(D.users.some(u=>u.email===e&&u.id!==me.id))S.msg=t('exists');
+  else{
+   me.name=v('pn')||me.name;me.email=e||me.email;me.phone=v('pp');me.city=v('pc');me.bio=v('pb');const rr=myRest();if(rr)rr.desc=me.bio;
+   D.th={acc:v('pa'),fs:+v('pf'),rad:+v('pr'),ft:v('pft'),fb:v('pfb')};
+   S.msg=t('saved');
+  }
+ }
+ sv();R();
+}
+
+R();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}</script>
+</body>
+</html>
