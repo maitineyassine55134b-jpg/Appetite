@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Appetite" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">#FF5A1F</item>
-        <item name="colorPrimaryDark">#FF5A1F</item>
+    <style name="Theme.Appetite" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">#FF5A1F</item>
         <item name="android:windowBackground">@android:color/white</item>
     </style>
